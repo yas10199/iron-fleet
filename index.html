@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>IRON FRONT — WWII Real-Time Strategy</title>
 <link rel="stylesheet" href="css/style.css">
+<!-- Safety net: if the stylesheet above ever fails to load (wrong folder,
+     wrong case, bad path), these few rules keep the game usable instead of
+     dumping every overlay on screen at once. -->
+<style>
+  html,body{height:100%;margin:0;background:#0d110b;color:#ded9c4;overflow:hidden}
+  .hidden{display:none !important}
+  #view{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #mainmenu,#results,#help{position:fixed;inset:0;z-index:40;background:#12160f;overflow:auto;padding:16px}
+  #topbar{position:fixed;top:0;left:0;right:0;z-index:20;background:#1a2013}
+</style>
 </head>
 <body>
 

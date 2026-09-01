@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>IRON FRONT — WWII Real-Time Strategy</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="view"></canvas>
+
+<!-- ============ TOP COMMAND BAR ============ -->
+<header id="topbar">
+  <div class="brand"><span>IRON</span><em>FRONT</em></div>
+  <div class="readouts">
+    <div class="rd"><span class="lbl sup">SUPPLIES</span><span class="val" id="rSupplies">0</span></div>
+    <div class="rd"><span class="lbl fue">FUEL</span><span class="val" id="rFuel">0</span></div>
+    <div class="rd wide"><span class="lbl">POWER</span><span class="val" id="rPower">0/0</span>
+      <span class="pwrbar"><i id="pwrFill"></i></span></div>
+    <div class="rd"><span class="lbl">UNITS</span><span class="val" id="rPop">0/0</span></div>
+    <div class="rd"><span class="lbl pts">COMMAND</span><span class="val" id="rPts">0/8</span></div>
+    <div class="rd"><span class="lbl">TIME</span><span class="val" id="rTimer">00:00</span></div>
+  </div>
+  <div class="tools">
+    <button id="btnHelp" class="tbtn">CONTROLS</button>
+    <button id="btnVoice" class="tbtn">VOICE ON</button>
+    <button id="btnMusic" class="tbtn">MUSIC ON</button>
+    <button id="btnPause" class="tbtn">PAUSE</button>
+    <button id="btnSound" class="tbtn">SOUND ON</button>
+  </div>
+</header>
+
+<!-- ============ BUILD / RESEARCH SIDEBAR ============ -->
+<aside id="sidebar">
+  <button id="sidebarToggle" title="Show or hide the build panel">▾</button>
+  <nav id="tabs">
+    <button class="tab on" data-tab="build">BASE</button>
+    <button class="tab" data-tab="inf">INFANTRY</button>
+    <button class="tab" data-tab="veh">ARMOUR</button>
+    <button class="tab" data-tab="air">AIR</button>
+    <button class="tab" data-tab="tech">TECH</button>
+  </nav>
+  <div id="cards"></div>
+  <div id="queue"></div>
+</aside>
+
+<!-- ============ COMMAND POWERS ============ -->
+<aside id="powers"></aside>
+
+<!-- ============ BOTTOM LEFT: MAP TABLE + SELECTION ============ -->
+<section id="hud">
+  <div id="mapframe">
+    <canvas id="minimap"></canvas>
+    <span class="mapcap">SECTOR MAP</span>
+  </div>
+  <div id="selpanel">
+    <div class="panelcap">SELECTION</div>
+    <div id="selinfo"><div class="dim">No selection.</div></div>
+    <div class="touchrow">
+      <button id="btnTouchSelect" class="tbtn small">BOX SELECT</button>
+      <button id="btnTouchStop" class="tbtn small">STOP</button>
+    </div>
+  </div>
+</section>
+
+<div id="messages"></div>
+
+<!-- ============ MAIN MENU ============ -->
+<div id="mainmenu">
+  <div class="menucard">
+    <h1><span>IRON</span><em>FRONT</em></h1>
+    <p class="tagline">Two armies. One river. One headquarters left standing.</p>
+
+    <div class="pick">
+      <h2>Choose your army</h2>
+      <div class="row">
+        <button class="fac on" data-faction="alliance">
+          <b>THE ALLIANCE</b>
+          <small>Builds fast, flies well, flexible infantry. Armour is a little thin.</small>
+        </button>
+        <button class="fac" data-faction="legion">
+          <b>THE IRON LEGION</b>
+          <small>Heavy tanks and hard emplacements. Slower, and technology costs more.</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="pick">
+      <h2>Enemy commander</h2>
+      <div class="row">
+        <button class="diff" data-diff="easy"><b>EASY</b><small>Builds slowly, attacks rarely.</small></button>
+        <button class="diff on" data-diff="normal"><b>NORMAL</b><small>Steady economy, regular attacks.</small></button>
+        <button class="diff" data-diff="hard"><b>HARD</b><small>Rich, researches everything, attacks hard.</small></button>
+      </div>
+    </div>
+
+    <button id="btnStart" class="start">START THE BATTLE</button>
+    <ul class="brief">
+      <li><b>The map starts dark.</b> Scout it. You only see what your units are looking at.</li>
+      <li><b>Build a Radar Station</b> or the sector map stays offline — and it needs power.</li>
+      <li><b>Units earn promotions</b> from kills. Veterans hit harder; Elites heal themselves.</li>
+      <li><b>Tanks crush infantry.</b> Screen your riflemen or lose them under the tracks.</li>
+      <li><b>Command Powers</b> charge over time: recon, repairs, barrages, paradrops, and worse.</li>
+    </ul>
+    <p class="fineprint">Left-click selects, right-click commands. Destroy the enemy Headquarters to win.</p>
+  </div>
+</div>
+
+<!-- ============ RESULTS ============ -->
+<div id="results" class="hidden">
+  <div class="menucard">
+    <h1 id="resultTitle">VICTORY</h1>
+    <div class="panelcap">AFTER-ACTION REPORT</div>
+    <div id="resultBody"></div>
+    <button id="btnRestart" class="start">FIGHT AGAIN</button>
+  </div>
+</div>
+
+<!-- ============ CONTROLS ============ -->
+<div id="help" class="hidden">
+  <div class="menucard">
+    <h1>CONTROLS</h1>
+    <div class="helpgrid">
+      <div><b>Left-click</b><span>Select a unit or building</span></div>
+      <div><b>Left-drag</b><span>Select a group of units</span></div>
+      <div><b>Double-click</b><span>Select every unit of that type on screen</span></div>
+      <div><b>Right-click ground</b><span>Move there</span></div>
+      <div><b>Right-click enemy</b><span>Attack it</span></div>
+      <div><b>Right-click a resource</b><span>Send a truck or tanker to collect it</span></div>
+      <div><b>Right-click while a building is selected</b><span>Set the rally point for new units</span></div>
+      <div><b>A then click</b><span>Attack-move: advance and shoot anything on the way</span></div>
+      <div><b>S</b><span>Stop</span></div>
+      <div><b>H</b><span>Jump to your Headquarters</span></div>
+      <div><b>Spacebar</b><span>Jump to wherever your base was last attacked</span></div>
+      <div><b>Ctrl + 1…9 / 1…9</b><span>Save a control group / select it</span></div>
+      <div><b>Arrow keys, screen edge, middle-drag</b><span>Move the camera</span></div>
+      <div><b>Click the sector map</b><span>Jump the camera there</span></div>
+      <div><b>Shift + right-click</b><span>Queue up several waypoints in order</span></div>
+      <div><b>Mouse wheel, + and −</b><span>Zoom in and out</span></div>
+      <div><b>Command Powers (left edge)</b><span>Click one, then click the map to call it in</span></div>
+      <div><b>Escape</b><span>Cancel building placement or an armed power</span></div>
+      <div><b>Touch: drag</b><span>Move the camera</span></div>
+      <div><b>Touch: tap unit, tap ground</b><span>Select, then order</span></div>
+      <div><b>Touch: press and hold</b><span>Attack-move to that spot</span></div>
+    </div>
+    <button id="btnCloseHelp" class="start">BACK TO THE FIGHT</button>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/pathfinding.js"></script>
+<script src="js/map.js"></script>
+<script src="js/fog.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/powers.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/game.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/input.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -242,6 +242,46 @@
       src.connect(f); f.connect(g); g.connect(this.ambBus);
       src.start();
       this.ambSrc = src;
+
+      this.startDistantGuns();
+    },
+
+    /* Artillery somewhere else on the front. You never see it — it just
+       rumbles away over the horizon so the map never feels empty. */
+    startDistantGuns: function () {
+      var self = this;
+      if (this.rumbleTimer) return;
+      var schedule = function () {
+        var wait = 5000 + Math.random() * 16000;
+        self.rumbleTimer = setTimeout(function () {
+          self.distantGun();
+          schedule();
+        }, wait);
+      };
+      schedule();
+    },
+
+    distantGun: function () {
+      if (!this.ctx || this.muted) return;
+      var c = this.ctx;
+      var out = c.createGain();
+      out.gain.value = 0.30 + Math.random() * 0.25;
+      var lp = c.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 190 + Math.random() * 120;
+      out.connect(lp);
+      if (c.createStereoPanner) {
+        var pan = c.createStereoPanner();
+        pan.pan.value = Math.random() * 1.6 - 0.8;
+        lp.connect(pan); pan.connect(this.ambBus);
+      } else lp.connect(this.ambBus);
+
+      var salvo = 1 + ((Math.random() * 3) | 0);
+      for (var i = 0; i < salvo; i++) {
+        var d = i * (0.18 + Math.random() * 0.25);
+        this.tone(out, 70, 22, 1.1, 0.30, 'sine', d);
+        this.noise(out, 1.4, 240, 0.4, 0.13, 'lowpass', 70);
+      }
     },
 
     /* ------------------------------------------------------------ music

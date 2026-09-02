@@ -28,7 +28,7 @@
     this.paused = false;
     this.speed = 1;
     this.messages = [];
-    this.cam = { x: 0, y: 0, zoom: 1 };
+    this.cam = { x: 0, y: 0, tx: 0, ty: 0, zoom: 1, zoomT: 1 };
     this.viewW = 1200; this.viewH = 700;
 
     this.players = [
@@ -46,9 +46,10 @@
 
   Game.prototype.makePlayer = function (id, factionId, isAI) {
     var f = IF.FACTIONS[factionId];
+    var boost = this.opts.startBoost || 1;
     return {
       id: id, faction: f, mods: f.mods, isAI: isAI,
-      supplies: IF.START.supplies, fuel: IF.START.fuel,
+      supplies: IF.START.supplies * boost, fuel: IF.START.fuel * boost,
       tech: {}, research: null,
       powerProd: 0, powerUse: 0, powerBalance: 0,
       pop: 0, popCap: 0, popQueued: 0,
@@ -106,9 +107,11 @@
     return this.hasBuilding(pid, 'radar') && this.players[pid].powerBalance >= 0;
   };
 
-  Game.prototype.centerOn = function (x, y) {
-    this.cam.x = IF.clamp(x - this.viewW / 2, 0, Math.max(0, this.map.pxW - this.viewW));
-    this.cam.y = IF.clamp(y - this.viewH / 2, 0, Math.max(0, this.map.pxH - this.viewH));
+  Game.prototype.centerOn = function (x, y, snap) {
+    var cx = IF.clamp(x - this.viewW / 2, 0, Math.max(0, this.map.pxW - this.viewW));
+    var cy = IF.clamp(y - this.viewH / 2, 0, Math.max(0, this.map.pxH - this.viewH));
+    this.cam.tx = cx; this.cam.ty = cy;
+    if (snap) { this.cam.x = cx; this.cam.y = cy; }
   };
 
   /* ---------------------------------------------------------- spawning */
@@ -116,9 +119,24 @@
     var b = new IF.Building(this, type, owner, tx, ty, instant);
     this.buildings.push(b);
     this.map.occupy(b);
+    this.evictFrom(b);
     if (instant) this.onBuildingComplete(b, true);
     this.recalc();
     return b;
+  };
+
+  /* Anyone standing where a building has just gone up gets pushed clear.
+     Without this they end up sealed inside the walls, unable to move. */
+  Game.prototype.evictFrom = function (b) {
+    var pad = 6;
+    var x0 = b.x - b.w / 2 - pad, x1 = b.x + b.w / 2 + pad;
+    var y0 = b.y - b.h / 2 - pad, y1 = b.y + b.h / 2 + pad;
+    for (var i = 0; i < this.units.length; i++) {
+      var u = this.units[i];
+      if (u.dead || u.def.domain === 'air') continue;
+      if (u.x < x0 || u.x > x1 || u.y < y0 || u.y > y1) continue;
+      u.unstick(this);
+    }
   };
 
   Game.prototype.spawnUnit = function (type, owner, x, y) {
@@ -180,6 +198,7 @@
         e.busy = null;
       }
       this.map.release(e);
+      if (IF.render && IF.render.invalidateGround) IF.render.invalidateGround();
       owner.stats.lostBuildings++;
       if (killer && killer !== owner) killer.stats.killedBuildings++;
       IF.fx.explosion(this, e.x, e.y, Math.max(e.w, e.h) * 0.8);
@@ -198,6 +217,13 @@
       if (e.armor !== 'infantry') {
         IF.fx.smoke(this, e.x, e.y, 14);
         this.addDecal(e.x, e.y, 'wreck', e.rad, { facing: e.facing, kindW: e.def.harvest ? 'truck' : 'tank' });
+        // ammunition cooking off a moment after the hull is knocked out
+        if (!e.def.harvest && e.rad > 10) {
+          this.strikes.push({
+            kind: 'cookoff', x: e.x, y: e.y, owner: e.owner, left: 1,
+            every: 0.5, t: IF.rand(0.35, 0.9), radius: e.rad * 2.2
+          });
+        }
         this.addDecal(e.x, e.y, 'scorch', e.rad * 1.4);
         this.shake(5, e.x, e.y);
       }
@@ -470,6 +496,7 @@
       br.hp -= amount;
       if (br.hp <= 0) {
         this.map.destroyBridge(br);
+        if (IF.render && IF.render.invalidateGround) IF.render.invalidateGround();
         this.msg('A bridge has collapsed');
         IF.fx.explosion(this, bx, by, 70);
         IF.audio.play('boom', bx, by);

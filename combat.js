@@ -115,6 +115,7 @@
         arc: w.type === 'bomb' ? 0 : 26
       }));
       IF.audio.play(w.type === 'bomb' ? 'bombdrop' : 'cannon', ax, ay);
+      IF.fx.gunSmoke(game, muzX, muzY, ang);
     } else if (w.type === 'rocket') {
       game.projectiles.push(new Projectile({
         x: muzX, y: muzY, target: target, tx: target.x, ty: target.y,
@@ -129,11 +130,25 @@
         attacker: attacker, kindP: 'shell'
       }));
       IF.audio.play('cannon', ax, ay);
+      IF.fx.gunSmoke(game, muzX, muzY, ang);
     } else {
       // Bullets and flak hit instantly; we only draw the tracer.
       IF.applyDamage(game, target, w.dmg, w.type, attacker);
       IF.fx.tracer(game, muzX, muzY, target.x, target.y, w.type === 'aa' ? '#ffd27a' : '#fff2b0');
       IF.audio.play(w.type === 'aa' ? 'flak' : 'gun', ax, ay);
+      // rounds kicking up dirt around whatever is being shot at
+      if (Math.random() < 0.5) {
+        IF.fx.dust(game, target.x + IF.rand(-10, 10), target.y + IF.rand(-8, 8));
+      }
+      // spent brass
+      if (Math.random() < 0.6) {
+        var ca = ang + Math.PI / 2 + IF.rand(-0.4, 0.4);
+        IF.fx.push(game, {
+          t: 'chunk', x: muzX, y: muzY, vx: Math.cos(ca) * 26, vy: Math.sin(ca) * 26,
+          vz: IF.rand(20, 45), z: 4, rot: Math.random() * 6.283, spin: IF.rand(-14, 14),
+          size: 1.6, life: 0.75, age: 0, brass: true
+        });
+      }
     }
     IF.fx.muzzle(game, muzX, muzY, ang);
     attacker.recoil = 1;
@@ -153,6 +168,15 @@
     },
     ring: function (game, x, y, r) {
       this.push(game, { t: 'ring', x: x, y: y, r: r, life: 0.5, age: 0 });
+    },
+    /* The grey bloom that hangs at the muzzle after a heavy gun fires. */
+    gunSmoke: function (game, x, y, ang) {
+      for (var i = 0; i < 2; i++) {
+        this.push(game, {
+          t: 'smoke', x: x + Math.cos(ang) * (5 + i * 7), y: y + Math.sin(ang) * (5 + i * 7),
+          r: 4 + i * 2.5, life: IF.rand(0.8, 1.4), age: 0, vy: -14
+        });
+      }
     },
     trail: function (game, x, y) {
       this.push(game, { t: 'trail', x: x, y: y, r: IF.rand(2.5, 4.5), life: 1.6, age: 0 });

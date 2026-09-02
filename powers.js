@@ -114,6 +114,11 @@
             u.chute = 1;
             IF.fx.dust(g, px, py);
           }
+        } else if (s.kind === 'cookoff') {
+          IF.fx.explosion(g, s.x, s.y, s.radius);
+          IF.fx.smoke(g, s.x, s.y, 22);
+          IF.audio.play('boom', s.x, s.y);
+          g.shake(9, s.x, s.y);
         } else if (s.kind === 'fuelair') {
           IF.splashDamage(g, s.x, s.y, s.splash, s.dmg, 'bomb', s.owner, null);
           IF.fx.explosion(g, s.x, s.y, 150);

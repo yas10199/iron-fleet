@@ -72,6 +72,29 @@
       }
     }
 
+    // Working industry puts smoke into the sky. Nothing to do with damage —
+    // it is just what a running factory looks like from the air.
+    if (this.complete && p.powerBalance >= 0 &&
+        (this.type === 'factory' || this.type === 'power' || this.type === 'refinery')) {
+      this.stackTimer = (this.stackTimer || 0) - dt;
+      if (this.stackTimer <= 0) {
+        this.stackTimer = this.type === 'factory' ? 0.8 : 1.5;
+        IF.fx.push(game, {
+          t: 'smoke', x: this.x + (this.type === 'factory' ? this.w * 0.28 : -this.w * 0.2),
+          y: this.y - this.h * 0.3, r: IF.rand(5, 9),
+          life: IF.rand(3.5, 5.5), age: 0, vy: -22
+        });
+      }
+    }
+
+    if (this.hp < this.maxHp * 0.5) {
+      this.smokeTimer -= dt;
+      if (this.smokeTimer <= 0) {
+        this.smokeTimer = this.hp < this.maxHp * 0.25 ? 0.35 : 0.9;
+        IF.fx.smoke(game, this.x + IF.rand(-this.w / 3, this.w / 3), this.y + IF.rand(-this.h / 3, this.h / 3), IF.rand(6, 12));
+      }
+    }
+
     // Defensive fire
     if (this.def.defence && this.def.weapon) {
       this.cool -= dt;
@@ -86,14 +109,6 @@
           this.cool = w.rof;
           IF.fireWeapon(game, this, this.target, w);
         }
-      }
-    }
-
-    if (this.hp < this.maxHp * 0.5) {
-      this.smokeTimer -= dt;
-      if (this.smokeTimer <= 0) {
-        this.smokeTimer = this.hp < this.maxHp * 0.25 ? 0.35 : 0.9;
-        IF.fx.smoke(game, this.x + IF.rand(-this.w / 3, this.w / 3), this.y + IF.rand(-this.h / 3, this.h / 3), IF.rand(6, 12));
       }
     }
   };
@@ -270,6 +285,23 @@
     IF.Path.request(this, x, y);
   };
 
+  /* Move to the closest open tile. Used when a building is dropped on top
+     of a unit, and as a periodic safety net for anything that has somehow
+     ended up inside impassable ground. */
+  Unit.prototype.unstick = function (game) {
+    var T2 = IF.TILE, map = game.map;
+    // already standing somewhere legal: leave it alone
+    if (map.passWorld(this.x, this.y, this.def.domain)) return;
+    var idx = Math.floor(this.y / T2) * map.w + Math.floor(this.x / T2);
+    var open = IF.Path.nearestOpen(map, idx, this.def.domain);
+    if (open < 0) return;
+    this.x = (open % map.w) * T2 + T2 / 2;
+    this.y = Math.floor(open / map.w) * T2 + T2 / 2;
+    this.path = null;
+    this.stuck = 0;
+    if (this.destX !== undefined) this.repathTo(this.destX, this.destY);
+  };
+
   /* --- update --------------------------------------------------------- */
   Unit.prototype.update = function (dt, game) {
     this.cool -= dt;
@@ -278,6 +310,13 @@
 
     // Paratroopers hang under the canopy for a moment before they can act.
     if (this.chute > 0) { this.chute -= dt * 0.55; return; }
+
+    // safety net: never leave a unit trapped inside terrain
+    this.checkGround = (this.checkGround || Math.random() * 2) - dt;
+    if (this.checkGround <= 0) {
+      this.checkGround = 2;
+      if (this.def.domain !== 'air' && !game.map.passWorld(this.x, this.y, this.def.domain)) this.unstick(game);
+    }
 
     var regen = IF.RANKS[this.rank].regen;
     if (regen && this.hp < this.maxHp && game.time - this.lastHit > 6) {

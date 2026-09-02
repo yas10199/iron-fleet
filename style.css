@@ -381,3 +381,262 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--bone);font-fami
   .pw{min-height:40px}
   .tab{min-height:36px}
 }
+
+/* ============================================================
+   LEGIBILITY PASS
+   The condensed stencil face looks the part in a big heading but
+   is hard to read at 13px. Anything you actually need to READ is
+   now set in a plain sans at a larger size, with more contrast.
+   ============================================================ */
+:root{
+  --bone:#eee9d8;
+  --dim:#a9ad97;
+}
+
+/* names: plain sans, sentence case, roomier */
+.cname{
+  font-family:var(--body);
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:.1px;
+  text-transform:none;
+  text-shadow:0 1px 2px rgba(0,0,0,.7);
+  line-height:1.2;
+  white-space:normal;
+}
+.selhead{
+  font-family:var(--body);
+  font-size:17px;
+  font-weight:700;
+  letter-spacing:.2px;
+  text-transform:none;
+  color:#f2d98c;
+  text-shadow:0 1px 3px rgba(0,0,0,.8);
+  margin-bottom:3px;
+}
+.pwname{
+  font-family:var(--body);
+  font-size:12.5px;
+  font-weight:600;
+  letter-spacing:.1px;
+  text-transform:none;
+  text-shadow:0 1px 2px rgba(0,0,0,.7);
+}
+
+/* numbers and labels */
+.ccost{font-size:12px;gap:11px;margin-top:3px}
+.clock{font-size:10px;min-height:12px;color:#e08b6d}
+.rd .lbl{font-size:9.5px;letter-spacing:1.5px}
+.rd .val{font-size:18px;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+.pwcost{font-size:9.5px;letter-spacing:.8px}
+.qrow{font-size:11px;padding:6px 7px}
+.qwait{font-size:10.5px}
+
+/* selection readout */
+.selstat{font-family:var(--body);font-size:12.5px;margin-top:4px;line-height:1.35}
+.selstat b{font-family:var(--mono);font-size:10px;letter-spacing:.8px;min-width:64px;color:#9ea38c}
+.seldesc{font-size:12px;line-height:1.45;margin-top:8px;color:#b9bda8}
+.chip{font-size:11px;padding:3px 7px}
+
+/* menus and help */
+.fac small,.diff small{font-size:12px;line-height:1.45}
+.fac b,.diff b{font-family:var(--body);font-weight:700;font-size:15px;letter-spacing:.2px;text-transform:none}
+.brief{font-size:13px;line-height:1.7}
+.helpgrid div{font-size:13px;padding:7px 0}
+.helpgrid b{font-family:var(--body);font-weight:600;font-size:12.5px;color:#f2d98c;min-width:230px}
+.helpgrid span{color:#bfc3ae}
+.rrow{font-size:13px;padding:8px 4px}
+.tagline{font-size:12px}
+.msg{font-family:var(--body);font-size:12.5px;font-weight:500;padding:6px 13px}
+.tab{font-size:10.5px;letter-spacing:.8px;padding:10px 2px}
+
+/* a little more room so names are not cramped */
+#sidebar{width:304px}
+.card{padding:7px;gap:10px}
+.card .icon{width:46px;height:46px}
+#selpanel{width:352px}
+
+@media (max-width:900px){
+  #sidebar{width:auto}
+  .cname{font-size:11.5px}
+  .selhead{font-size:15px}
+  .helpgrid b{min-width:130px}
+  #selpanel{width:calc(100vw - 156px)}
+}
+
+/* ============================================================
+   FRONT SCREEN
+   Key art fills the screen; a scrim darkens it from the middle
+   down so every word sits on solid contrast. Options are big,
+   plainly worded, and unmistakably on or off.
+   ============================================================ */
+#mainmenu,#results,#help{
+  display:block;
+  background:#070905;
+  padding:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+#mainmenu::before,#results::before,#help::before{content:none}
+
+.menuArt{
+  position:fixed;inset:0;
+  background-image:url('menu.svg');
+  background-size:cover;
+  background-position:50% 22%;
+  background-repeat:no-repeat;
+  filter:saturate(.92) contrast(1.04);
+}
+.menuArt.dark{filter:saturate(.5) brightness(.42)}
+
+.menuScrim{
+  position:fixed;inset:0;
+  background:
+    radial-gradient(120% 75% at 50% 6%,rgba(255,214,150,.10),transparent 60%),
+    linear-gradient(180deg,
+      rgba(7,9,5,.30) 0%,
+      rgba(7,9,5,.52) 32%,
+      rgba(7,9,5,.88) 62%,
+      rgba(7,9,5,.97) 100%);
+}
+
+.menuInner{
+  position:relative;
+  min-height:100%;
+  display:flex;flex-direction:column;align-items:center;
+  padding:min(9vh,90px) 16px 44px;
+}
+
+/* --- title over the art --- */
+.menuTitle{text-align:center;margin-bottom:26px}
+.menuTitle h1{
+  font-family:var(--display);
+  font-size:clamp(46px,10vw,86px);
+  letter-spacing:5px;
+  line-height:.92;
+  margin:0;
+  text-shadow:0 3px 0 rgba(0,0,0,.65),0 0 34px rgba(0,0,0,.85);
+}
+.menuTitle h1 span{color:#f4efdd}
+.menuTitle h1 em{color:#e9c463;font-style:normal;margin-left:10px}
+.menuTitle .tagline{
+  font-family:var(--body);
+  font-size:14px;letter-spacing:.4px;
+  color:#ded8c2;margin:12px 0 0;
+  text-shadow:0 2px 6px rgba(0,0,0,.9);
+}
+
+/* --- the options card --- */
+#mainmenu .menucard,#results .menucard,#help .menucard{
+  position:relative;
+  width:min(760px,100%);
+  margin:0 auto;
+  padding:26px 26px 24px;
+  border:1px solid rgba(140,152,110,.34);
+  border-radius:4px;
+  background:linear-gradient(180deg,rgba(18,23,15,.90),rgba(10,13,8,.94));
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+  box-shadow:0 26px 70px rgba(0,0,0,.72),inset 0 1px 0 rgba(255,255,255,.07);
+}
+#results .menucard,#help .menucard{margin:min(8vh,70px) auto 40px}
+
+/* --- section headings --- */
+.pick{margin-bottom:22px}
+.pick h2{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--body);
+  font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+  color:#c9cdb4;margin:0 0 11px;
+}
+.pick h2 .num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:21px;height:21px;border-radius:50%;
+  background:#e9c463;color:#14170e;
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0;
+}
+
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row.three .diff{min-width:150px}
+
+/* --- choices --- */
+.fac,.diff,.mode{
+  position:relative;flex:1;min-width:210px;
+  padding:14px 15px 13px;cursor:pointer;text-align:left;
+  color:var(--bone);
+  background:linear-gradient(180deg,rgba(38,46,28,.72),rgba(20,25,15,.80));
+  border:1px solid rgba(120,134,92,.40);
+  border-radius:4px;
+  transition:border-color .12s,background .12s,transform .08s;
+}
+.fac:hover,.diff:hover,.mode:hover{
+  border-color:rgba(233,196,99,.75);
+  background:linear-gradient(180deg,rgba(52,62,36,.82),rgba(28,34,20,.88));
+}
+.fac:active,.diff:active,.mode:active{transform:translateY(1px)}
+.fac b,.diff b,.mode b{
+  display:block;
+  font-family:var(--body);font-size:17px;font-weight:700;letter-spacing:.2px;
+  text-transform:none;color:#f4efdd;margin-bottom:5px;
+}
+.fac small,.diff small,.mode small{
+  display:block;font-size:12.5px;line-height:1.5;color:#b3b8a0;
+}
+
+/* the selected state has to be unmistakable */
+.fac.on,.diff.on,.mode.on{
+  border-color:#e9c463;
+  background:linear-gradient(180deg,rgba(74,68,30,.80),rgba(40,40,20,.88));
+  box-shadow:inset 0 0 0 1px rgba(233,196,99,.55),0 0 22px rgba(233,196,99,.16);
+}
+.fac.on b,.diff.on b,.mode.on b{color:#ffe9a8}
+.tick{
+  position:absolute;top:9px;right:10px;display:none;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:1.2px;
+  color:#14170e;background:#e9c463;padding:3px 6px;border-radius:2px;
+}
+.fac.on .tick,.diff.on .tick,.mode.on .tick{display:block}
+
+.facBar{display:block;height:4px;width:52px;border-radius:2px;margin-bottom:9px}
+.facBar.alliance{background:#5b9bd8}
+.facBar.legion{background:#c2542f}
+
+/* --- start --- */
+#mainmenu .start{
+  margin-top:8px;padding:17px;
+  font-family:var(--display);font-size:26px;letter-spacing:3px;
+  border-radius:3px;
+  background:linear-gradient(180deg,#f2d67e,#c9a23c);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -4px 0 rgba(0,0,0,.26),0 10px 26px rgba(0,0,0,.5);
+}
+#mainmenu .start:hover{background:linear-gradient(180deg,#ffe79a,#d8b04a)}
+
+/* --- briefing --- */
+.brief{
+  margin:20px 0 0;padding:16px 18px 16px 34px;
+  list-style:none;position:relative;
+  border-top:1px solid rgba(140,152,110,.22);
+  font-size:13px;line-height:1.75;color:#b3b8a0;
+}
+.brief li{position:relative;margin-bottom:6px;padding-left:2px}
+.brief li::before{
+  content:'';position:absolute;left:-16px;top:9px;
+  width:5px;height:5px;background:#e9c463;transform:rotate(45deg);
+}
+.brief b{color:#eee9d8;font-weight:600}
+.fineprint{margin-top:14px;font-size:11.5px;color:#8f9480;text-align:center}
+
+/* results and controls keep the same treatment */
+#resultTitle{font-size:clamp(38px,8vw,62px);letter-spacing:4px;text-align:center;margin-bottom:14px}
+#results .panelcap{text-align:center}
+
+@media (max-width:900px){
+  .menuInner{padding:34px 12px 32px}
+  .menuArt{background-position:50% 18%}
+  .menuTitle{margin-bottom:20px}
+  #mainmenu .menucard,#results .menucard,#help .menucard{padding:18px 15px 18px}
+  .fac,.diff,.mode{min-width:100%;padding:13px 14px}
+  .row.three .diff{min-width:100%}
+  #mainmenu .start{font-size:21px;padding:16px}
+  .brief{font-size:12.5px;padding-left:28px}
+}

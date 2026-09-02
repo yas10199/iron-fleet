@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  IRON FRONT — menu.svg
+  Original key art, drawn from scratch as vector shapes. Nothing here is
+  traced, copied or derived from another image, so it is yours to use
+  anywhere, including publicly and commercially.
+
+  Composition: low sun behind a smoke-filled sky, three ridges receding
+  into haze, a bomber flight coming in over an armoured advance, infantry
+  moving up through wire in the foreground.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo5ZDI4NDI2OC0xMjdmLTRkZDYtYjhhZS0wMTA0ZWIzYWNhM2QAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaPM+OmVf+I+eA/pjP1iixAwAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpkM2ZjYTdlNy1lOWYyLTRmOWYtYjVjNi01NGRjY2VlZTUxNzZscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoJcOGXzCVymI3xCg+3GoXgQAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggl4HqITYs6vZnvCekGxPMzhXFz+UTv2DHBYcelWNchpOkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaF2+hkKEOqB1/Vc6qpPM/RsAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIMfDXKaL29x01zbQ36xpg0rZrwv83XIXnMRNtqw9ReoUZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GQJhZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjlkMjg0MjY4LTEyN2YtNGRkNi1iOGFlLTAxMDRlYjNhY2EzZC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjk2NTdlZTExLWQyZWUtNGVhZi1hYzY5LTQyMWM5ZTEwYTA1NnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCCXgeohNizq9me8J6QbE8zOFcXP5RO/YMcFhx6VY1yGk6JjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggj1WjIHsaZrqjGL4LYXiLZxrH4kUcVMrAi87LsONDwvOiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggMOHiVKpZ9rjM2Ir4lXMOgcgnVnCGKZMeBqzBKhUeKoR0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQJMtXK+AaC34fb9gc31Z+3LKx/U28yyR9leWVOPTJF3RLdTDwv8qfkxzxYf0ftISnWQa6bEZ1PAlWC6wlpJ1+lg=</c2pa:manifest></metadata>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"    stop-color="#1a2230"/>
+      <stop offset="0.34" stop-color="#4a4436"/>
+      <stop offset="0.58" stop-color="#96703a"/>
+      <stop offset="0.74" stop-color="#c98f3c"/>
+      <stop offset="0.86" stop-color="#e0a748"/>
+      <stop offset="1"    stop-color="#d8933c"/>
+    </linearGradient>
+
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#ffe9a8" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#ffb347" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#fff0c0" stop-opacity="0.92"/>
+      <stop offset="0.30" stop-color="#ffcb64" stop-opacity="0.55"/>
+      <stop offset="0.65" stop-color="#d4762c" stop-opacity="0.18"/>
+      <stop offset="1"    stop-color="#8a3d18" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="blast" cx="0.5" cy="0.62" r="0.5">
+      <stop offset="0"    stop-color="#fff6d2" stop-opacity="1"/>
+      <stop offset="0.28" stop-color="#ffb347" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="fire" cx="0.5" cy="0.68" r="0.5">
+      <stop offset="0"    stop-color="#fff7d8" stop-opacity="1"/>
+      <stop offset="0.30" stop-color="#ffbe52" stop-opacity="0.92"/>
+      <stop offset="0.62" stop-color="#e0651f" stop-opacity="0.55"/>
+      <stop offset="1"    stop-color="#7c2c0e" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="ridgeFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6c6248"/>
+      <stop offset="1" stop-color="#4e4736"/>
+    </linearGradient>
+
+    <linearGradient id="ridge2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a4634"/>
+      <stop offset="1" stop-color="#2f2d22"/>
+    </linearGradient>
+
+    <linearGradient id="ridge3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a281d"/>
+      <stop offset="1" stop-color="#171610"/>
+    </linearGradient>
+
+    <linearGradient id="fore" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14140e"/>
+      <stop offset="1" stop-color="#080805"/>
+    </linearGradient>
+
+    <linearGradient id="smoke" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0"   stop-color="#2b2620" stop-opacity="0.85"/>
+      <stop offset="0.6" stop-color="#4a443a" stop-opacity="0.42"/>
+      <stop offset="1"   stop-color="#6a6355" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8a95a" stop-opacity="0"/>
+      <stop offset="1" stop-color="#e0a052" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- film grain, so the flat vector fills do not look plastic -->
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="7" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.10"/>
+      </feComponentTransfer>
+    </filter>
+
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+
+    <filter id="softer" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+
+    <!-- one aircraft, reused across the flight -->
+    <g id="plane">
+      <path d="M 46 0 L 12 -9 L -34 -7 L -46 0 L -34 7 L 12 9 Z"/>
+      <rect x="-12" y="-42" width="20" height="84" rx="3"/>
+      <rect x="-42" y="-20" width="13" height="40" rx="2"/>
+      <ellipse cx="-30" cy="-30" rx="9" ry="5"/>
+      <ellipse cx="-30" cy="30" rx="9" ry="5"/>
+    </g>
+
+    <!-- one tank, reused along the ridge -->
+    <g id="tank">
+      <rect x="-46" y="-6" width="92" height="15" rx="4"/>
+      <path d="M -46 -6 L 30 -6 L 40 -18 L -40 -18 Z"/>
+      <rect x="-16" y="-30" width="40" height="14" rx="5"/>
+      <rect x="20" y="-26" width="46" height="5" rx="2"/>
+      <circle cx="-34" cy="6" r="7"/>
+      <circle cx="-16" cy="7" r="7"/>
+      <circle cx="4" cy="7" r="7"/>
+      <circle cx="24" cy="7" r="7"/>
+      <circle cx="40" cy="6" r="7"/>
+    </g>
+
+    <!-- one soldier, reused across the advance -->
+    <g id="soldier">
+      <path d="M 0 0 L -5 -16 L -3 -30 L 4 -30 L 7 -16 L 4 0 Z"/>
+      <ellipse cx="1" cy="-36" rx="8" ry="6"/>
+      <path d="M -4 0 L -10 16 L -5 17 L 1 4 L 7 17 L 12 15 L 5 0 Z"/>
+      <rect x="-16" y="-26" width="34" height="3.4" rx="1.4" transform="rotate(-24 1 -24)"/>
+      <rect x="-9" y="-22" width="9" height="11" rx="2"/>
+    </g>
+  </defs>
+
+  <!-- ================= SKY ================= -->
+  <rect width="1600" height="900" fill="url(#sky)"/>
+
+  <!-- sun -->
+  <ellipse cx="1130" cy="560" rx="360" ry="230" fill="url(#glow)"/>
+  <circle cx="1130" cy="558" r="62" fill="#ffe6a0" opacity="0.92"/>
+  <circle cx="1130" cy="558" r="96" fill="#ffd67a" opacity="0.22" filter="url(#soft)"/>
+
+  <!-- high cloud bands -->
+  <g opacity="0.5" filter="url(#soft)">
+    <ellipse cx="330"  cy="150" rx="330" ry="42" fill="#2c3342"/>
+    <ellipse cx="900"  cy="106" rx="380" ry="34" fill="#333a49"/>
+    <ellipse cx="1380" cy="200" rx="330" ry="46" fill="#3b3a3c"/>
+    <ellipse cx="640"  cy="250" rx="420" ry="40" fill="#4c463c"/>
+    <ellipse cx="1220" cy="320" rx="360" ry="38" fill="#6a5a42"/>
+  </g>
+
+  <!-- ================= DISTANT SMOKE COLUMNS ================= -->
+  <g filter="url(#soft)">
+    <path d="M 250 620 C 232 520 268 450 248 360 C 236 300 264 250 250 190
+             L 330 190 C 322 254 348 300 336 362 C 320 452 352 524 340 620 Z"
+          fill="url(#smoke)" opacity="0.85"/>
+    <path d="M 700 640 C 686 570 712 520 700 460 C 690 410 714 372 704 330
+             L 762 330 C 758 376 780 412 770 462 C 758 522 782 572 770 640 Z"
+          fill="url(#smoke)" opacity="0.7"/>
+    <path d="M 1420 630 C 1404 550 1436 490 1420 420 C 1408 366 1434 330 1424 292
+             L 1492 292 C 1486 334 1508 368 1498 424 C 1484 494 1512 552 1498 630 Z"
+          fill="url(#smoke)" opacity="0.66"/>
+  </g>
+
+  <!-- ================= AIRCRAFT ================= -->
+  <g fill="#15150f">
+    <g transform="translate(1010,215) rotate(9) scale(0.92)" opacity="0.95"><use href="#plane"/></g>
+    <g transform="translate(1216,146) rotate(9) scale(0.66)" opacity="0.85"><use href="#plane"/></g>
+    <g transform="translate(838,142) rotate(9) scale(0.55)" opacity="0.78"><use href="#plane"/></g>
+    <g transform="translate(1372,268) rotate(9) scale(0.40)" opacity="0.62"><use href="#plane"/></g>
+    <g transform="translate(640,196) rotate(9) scale(0.30)" opacity="0.5"><use href="#plane"/></g>
+  </g>
+
+  <!-- ================= FAR RIDGE ================= -->
+  <path d="M 0 612 C 150 588 260 606 400 592 C 540 578 640 600 780 590
+           C 920 580 1030 598 1180 586 C 1320 575 1450 596 1600 584 L 1600 900 L 0 900 Z"
+        fill="#5c5440" opacity="0.85"/>
+  <!-- far treeline -->
+  <g fill="#4a4433" opacity="0.8">
+    <ellipse cx="120" cy="600" rx="26" ry="16"/><ellipse cx="168" cy="596" rx="20" ry="13"/>
+    <ellipse cx="470" cy="586" rx="24" ry="15"/><ellipse cx="512" cy="590" rx="18" ry="12"/>
+    <ellipse cx="900" cy="584" rx="28" ry="17"/><ellipse cx="946" cy="588" rx="20" ry="13"/>
+    <ellipse cx="1310" cy="580" rx="24" ry="15"/><ellipse cx="1352" cy="584" rx="18" ry="12"/>
+  </g>
+
+  <!-- burning position on the far ridge -->
+  <ellipse cx="700" cy="588" rx="150" ry="70" fill="url(#fire)" opacity="0.55"/>
+  <ellipse cx="252" cy="606" rx="110" ry="54" fill="url(#fire)" opacity="0.36"/>
+
+  <!-- ================= MIDDLE RIDGE ================= -->
+  <path d="M 0 668 C 180 646 300 664 470 652 C 640 640 760 662 940 650
+           C 1110 638 1260 660 1600 644 L 1600 900 L 0 900 Z"
+        fill="url(#ridge2)"/>
+
+  <!-- armour advancing along the middle ridge -->
+  <g fill="#1d1c14">
+    <g transform="translate(415,654) scale(0.52)"><use href="#tank"/></g>
+    <g transform="translate(560,650) scale(0.46)"><use href="#tank"/></g>
+    <g transform="translate(1180,650) scale(0.44)"><use href="#tank"/></g>
+  </g>
+  <!-- dust behind them -->
+  <g fill="#6e6046" opacity="0.30" filter="url(#soft)">
+    <ellipse cx="352" cy="660" rx="70" ry="18"/>
+    <ellipse cx="508" cy="656" rx="60" ry="15"/>
+    <ellipse cx="1128" cy="656" rx="58" ry="15"/>
+  </g>
+
+  <!-- telegraph line -->
+  <g stroke="#14140e" stroke-width="4" fill="none" opacity="0.9">
+    <path d="M 190 662 L 190 596"/><path d="M 168 606 L 212 606"/>
+    <path d="M 372 656 L 372 598"/><path d="M 352 608 L 392 608"/>
+    <path d="M 1444 650 L 1444 594"/><path d="M 1424 604 L 1464 604"/>
+  </g>
+  <g stroke="#14140e" stroke-width="2" fill="none" opacity="0.65">
+    <path d="M 190 604 C 280 622 300 620 372 606"/>
+    <path d="M 372 606 C 700 640 1180 640 1444 602"/>
+  </g>
+
+  <!-- ================= NEAR RIDGE ================= -->
+  <path d="M 0 742 C 220 716 380 738 600 724 C 820 710 980 734 1220 720
+           C 1380 711 1500 728 1600 718 L 1600 900 L 0 900 Z"
+        fill="url(#ridge3)"/>
+
+  <!-- shell bursts along the near ridge -->
+  <ellipse cx="300" cy="716" rx="120" ry="80" fill="url(#blast)" opacity="0.5"/>
+  <ellipse cx="300" cy="716" rx="66" ry="50" fill="url(#fire)" opacity="0.85"/>
+  <ellipse cx="1005" cy="712" rx="90" ry="60" fill="url(#fire)" opacity="0.6"/>
+
+  <!-- infantry moving up the near ridge -->
+  <g fill="#100f0a">
+    <g transform="translate(700,726) scale(0.78)"><use href="#soldier"/></g>
+    <g transform="translate(752,731) scale(0.72) scale(-1,1)"><use href="#soldier"/></g>
+    <g transform="translate(830,728) scale(0.80)"><use href="#soldier"/></g>
+    <g transform="translate(1290,722) scale(0.70)"><use href="#soldier"/></g>
+    <g transform="translate(1338,726) scale(0.64) scale(-1,1)"><use href="#soldier"/></g>
+  </g>
+
+  <!-- ================= FOREGROUND ================= -->
+  <path d="M 0 812 C 200 784 420 806 640 792 C 860 778 1060 800 1300 786
+           C 1420 779 1520 794 1600 786 L 1600 900 L 0 900 Z"
+        fill="url(#fore)"/>
+
+  <!-- foreground armour, large and close -->
+  <g fill="#0a0a06">
+    <g transform="translate(300,800) scale(1.35)"><use href="#tank"/></g>
+    <g transform="translate(1180,806) scale(1.05) scale(-1,1)"><use href="#tank"/></g>
+  </g>
+
+  <!-- wire and stakes across the very front -->
+  <g stroke="#0a0a06" stroke-width="5" fill="none">
+    <path d="M 60 862 L 66 810"/><path d="M 210 858 L 216 812"/>
+    <path d="M 700 856 L 706 806"/><path d="M 880 858 L 886 808"/>
+    <path d="M 1450 856 L 1456 808"/>
+  </g>
+  <g stroke="#0a0a06" stroke-width="3" fill="none" opacity="0.95">
+    <path d="M 66 820 C 130 840 160 806 216 824 C 400 862 520 800 706 818
+             C 800 828 830 806 886 818 C 1100 862 1280 800 1456 818"/>
+    <path d="M 66 836 C 140 856 170 822 216 840 C 420 878 540 818 706 834
+             C 810 844 840 822 886 834 C 1120 876 1290 816 1456 834"/>
+  </g>
+
+  <!-- foreground grass tufts -->
+  <g stroke="#0a0a06" stroke-width="3" fill="none" opacity="0.9">
+    <path d="M 420 900 L 428 856"/><path d="M 432 900 L 446 862"/><path d="M 444 900 L 452 858"/>
+    <path d="M 980 900 L 988 858"/><path d="M 994 900 L 1006 864"/>
+    <path d="M 1540 900 L 1548 854"/><path d="M 1556 900 L 1566 862"/>
+  </g>
+
+  <!-- ================= ATMOSPHERE ================= -->
+  <!-- warm haze rolling across the middle distance -->
+  <g opacity="0.28" filter="url(#softer)">
+    <ellipse cx="500"  cy="660" rx="420" ry="52" fill="#c08a44"/>
+    <ellipse cx="1220" cy="676" rx="460" ry="46" fill="#c8934a"/>
+  </g>
+
+  <!-- vignette -->
+  <rect width="1600" height="900" fill="none"/>
+  <path d="M 0 0 L 1600 0 L 1600 900 L 0 900 Z" fill="url(#haze)"/>
+  <rect width="1600" height="900" fill="#000" opacity="0" />
+  <g opacity="0.55">
+    <rect x="0" y="0" width="1600" height="150" fill="#0a0c08" opacity="0.55"/>
+    <rect x="0" y="740" width="1600" height="160" fill="#080805" opacity="0.6"/>
+    <rect x="0" y="0" width="150" height="900" fill="#0a0c08" opacity="0.35"/>
+    <rect x="1450" y="0" width="150" height="900" fill="#0a0c08" opacity="0.35"/>
+  </g>
+
+  <!-- grain over everything -->
+  <rect width="1600" height="900" filter="url(#grain)" opacity="0.55"/>
+</svg>

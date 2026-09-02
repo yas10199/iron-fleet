@@ -296,3 +296,88 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--bone);font-fami
 .pwrbar i{display:block;height:100%;width:0;background:var(--good);transition:width .25s linear}
 .pwrbar i.warn{background:var(--brass)}
 .pwrbar i.over{background:var(--rust)}
+
+/* ============================================================
+   FIELD EQUIPMENT PASS
+   Panels become stamped steel plate: a brushed gradient, a hard
+   bevel top and bottom, and rivets at the corners. Same world as
+   the battlefield rather than flat web boxes.
+   ============================================================ */
+#topbar{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.07) 0 1px,transparent 1px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.014) 0 2px,transparent 2px 4px),
+    linear-gradient(180deg,#2b3322 0%,#212819 45%,#151a11 100%);
+  border-bottom:2px solid #080b06;
+  box-shadow:0 3px 0 rgba(0,0,0,.5),inset 0 -1px 0 rgba(0,0,0,.5);
+}
+#sidebar,#selpanel,#mapframe,.menucard{
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 2px,transparent 2px 4px),
+    linear-gradient(180deg,#242c1c 0%,#1a2015 40%,#111509 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -2px 0 rgba(0,0,0,.5),
+    inset 0 0 0 1px var(--edge);
+}
+#sidebar{border-left:2px solid #080b06}
+
+/* rivets */
+#selpanel,#sidebar{position:fixed}
+#selpanel::before,#selpanel::after{
+  content:'';position:absolute;width:5px;height:5px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#7c8a5e,#39412a);
+}
+#selpanel::before{left:5px;top:5px}
+#selpanel::after{right:5px;top:5px}
+
+.card{
+  background:linear-gradient(180deg,#1f2718,#151a10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(0,0,0,.5);
+}
+.card:hover{
+  background:linear-gradient(180deg,#2b3520,#1b2114);
+  box-shadow:inset 0 0 0 1px var(--brass),0 0 10px rgba(215,180,90,.20);
+}
+.card .icon{
+  background:radial-gradient(circle at 40% 30%,#1a2014,#0c0f09);
+  box-shadow:inset 0 0 0 1px #0a0d08,inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.pw{
+  background:linear-gradient(180deg,#232b1a,#12160f);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),inset 0 -1px 0 rgba(0,0,0,.5);
+}
+.pw.ready{box-shadow:inset 0 0 0 1px var(--edge2),inset 0 1px 0 rgba(255,255,255,.07)}
+
+.tbtn{
+  background:linear-gradient(180deg,#333d27,#232b1b);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.45);
+}
+.tbtn:hover{background:linear-gradient(180deg,#404c2f,#2a3320)}
+
+.start{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -3px 0 rgba(0,0,0,.28);
+  text-shadow:0 1px 0 rgba(255,255,255,.25);
+}
+
+/* stencil feel on the big headings */
+.brand,.menucard h1,.cname,.selhead,.pwname{
+  text-transform:uppercase;
+  text-shadow:0 2px 0 rgba(0,0,0,.55);
+}
+.menucard h1{letter-spacing:3px}
+
+#messages .msg{
+  background:linear-gradient(90deg,rgba(13,17,11,.92),rgba(13,17,11,.72));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  letter-spacing:.4px;
+}
+
+/* keep touch targets comfortable on a phone */
+@media (max-width:900px){
+  .tbtn{min-height:34px}
+  .card{min-height:78px}
+  .pw{min-height:40px}
+  .tab{min-height:36px}
+}

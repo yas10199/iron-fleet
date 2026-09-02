@@ -85,6 +85,7 @@
     var life = 999999;
     if (type === 'wreck') life = 90;
     else if (type === 'track') life = 18;
+    else if (type === 'body') life = 55;
     var d = { x: x, y: y, type: type, r: r, age: 0, life: life, rot: Math.random() * 6.283 };
     if (extra) for (var k in extra) d[k] = extra[k];
     this.decals.push(d);
@@ -193,6 +194,7 @@
       owner.stats.lostUnits++;
       if (killer && killer !== owner) killer.stats.killedUnits++;
       IF.fx.explosion(this, e.x, e.y, e.armor === 'infantry' ? 9 : 20);
+      if (e.armor === 'infantry') this.addDecal(e.x, e.y, 'body', 7, { facing: e.facing });
       if (e.armor !== 'infantry') {
         IF.fx.smoke(this, e.x, e.y, 14);
         this.addDecal(e.x, e.y, 'wreck', e.rad, { facing: e.facing, kindW: e.def.harvest ? 'truck' : 'tank' });

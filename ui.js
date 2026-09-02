@@ -359,89 +359,226 @@
     },
 
     /* ---------------------------------------------------------- icons */
+    /* Icons are drawn in the same language as the battlefield art: a lifted
+       box with a roof for structures, a hull and turret for vehicles, a
+       helmeted figure for infantry. So the sidebar reads like the map. */
     drawIcon: function (c, id, kind, faction) {
       c.clearRect(0, 0, 48, 48);
       c.save();
-      c.translate(24, 24);
+      c.translate(24, 27);
       var col = faction.color, dark = faction.dark;
+      var legion = faction.id === 'legion';
 
       if (kind === 'tech') {
-        c.strokeStyle = '#d7b45a'; c.lineWidth = 2.5;
-        c.beginPath(); c.arc(0, 0, 12, 0, 6.283); c.stroke();
-        c.beginPath(); c.moveTo(-12, 0); c.lineTo(12, 0); c.moveTo(0, -12); c.lineTo(0, 12); c.stroke();
-        c.fillStyle = '#d7b45a'; c.beginPath(); c.arc(0, 0, 4, 0, 6.283); c.fill();
+        c.fillStyle = 'rgba(0,0,0,0.35)';
+        c.beginPath(); c.ellipse(2, 12, 14, 5, 0, 0, 6.283); c.fill();
+        c.strokeStyle = '#d7b45a'; c.lineWidth = 2.4;
+        c.beginPath(); c.arc(0, -2, 11, 0, 6.283); c.stroke();
+        c.beginPath(); c.moveTo(-11, -2); c.lineTo(11, -2); c.moveTo(0, -13); c.lineTo(0, 9); c.stroke();
+        c.fillStyle = '#d7b45a'; c.beginPath(); c.arc(0, -2, 3.6, 0, 6.283); c.fill();
+        c.strokeStyle = 'rgba(215,180,90,0.5)'; c.lineWidth = 1.4;
+        c.beginPath(); c.arc(0, -2, 16, -0.9, 0.9); c.stroke();
         c.restore(); return;
       }
 
       if (kind === 'building') {
-        c.fillStyle = '#59605d'; c.fillRect(-15, -13, 30, 26);
-        c.fillStyle = dark; c.fillRect(-15, -13, 30, 5);
-        c.fillStyle = col; c.fillRect(-15, 8, 30, 5);
+        var H = 13, w = 28, h = 20;
+        c.fillStyle = 'rgba(0,0,0,0.35)';
+        c.beginPath();
+        c.moveTo(-w / 2, -h / 2); c.lineTo(w / 2, -h / 2);
+        c.lineTo(w / 2 + 8, -h / 2 + 5); c.lineTo(w / 2 + 8, h / 2 + 5);
+        c.lineTo(-w / 2 + 8, h / 2 + 5); c.lineTo(-w / 2, h / 2);
+        c.closePath(); c.fill();
+        // wall
+        c.fillStyle = legion ? '#5a5245' : '#5c6469';
+        c.fillRect(-w / 2, h / 2 - H, w, H);
+        c.fillStyle = 'rgba(20,24,28,0.55)';
+        for (var wx = -w / 2 + 3; wx < w / 2 - 4; wx += 8) c.fillRect(wx, h / 2 - H + 4, 4, 4);
+        // roof
+        c.fillStyle = legion ? '#6d6353' : '#6e777d';
+        c.fillRect(-w / 2, -h / 2 - H, w, h);
+        c.fillStyle = legion ? '#857a67' : '#87919a';
+        c.fillRect(-w / 2 + 1.5, -h / 2 - H + 1.5, w - 3, h - 4);
+        c.fillStyle = 'rgba(255,244,206,0.20)';
+        c.fillRect(-w / 2 + 1.5, -h / 2 - H + 1.5, w - 3, 2.5);
+        c.fillStyle = col;
+        c.fillRect(-w / 2 + 1.5, -h / 2 - H + h - 5, w - 3, 3);
+
+        c.save();
+        c.translate(0, -H);
         c.fillStyle = '#2f3630';
         switch (id) {
-          case 'power': c.beginPath(); c.arc(-6, 0, 6, 0, 6.283); c.arc(7, 3, 5, 0, 6.283); c.fill(); break;
-          case 'depot': c.fillStyle = '#d4ab48'; c.fillRect(-10, -4, 9, 9); c.fillRect(2, -1, 9, 9); break;
-          case 'refinery': c.fillStyle = '#4f8f6d'; c.beginPath(); c.arc(-5, 1, 7, 0, 6.283); c.fill(); c.fillRect(3, -2, 9, 9); break;
-          case 'barracks': c.fillRect(-4, -2, 9, 11); c.fillStyle = col; c.fillRect(-2, 1, 5, 8); break;
+          case 'power':
+            c.beginPath(); c.ellipse(-6, -1, 6, 5, 0, 0, 6.283); c.fill();
+            c.beginPath(); c.ellipse(7, 4, 4.5, 4, 0, 0, 6.283); c.fill();
+            c.fillStyle = '#8a9198';
+            c.beginPath(); c.ellipse(-6, -2, 3.6, 3, 0, 0, 6.283); c.fill();
+            break;
+          case 'depot':
+            for (var q = 0; q < 4; q++) {
+              c.fillStyle = '#a8802c'; c.fillRect(-10 + (q % 2) * 11, -6 + Math.floor(q / 2) * 10, 9, 8);
+              c.fillStyle = '#dcb14a'; c.fillRect(-10 + (q % 2) * 11, -6 + Math.floor(q / 2) * 10, 9, 5);
+            }
+            break;
+          case 'refinery':
+            c.fillStyle = '#3a443f'; c.beginPath(); c.ellipse(-6, 0, 7, 6, 0, 0, 6.283); c.fill();
+            c.fillStyle = '#4b564f'; c.beginPath(); c.ellipse(-6, -1.4, 5, 4.4, 0, 0, 6.283); c.fill();
+            c.fillStyle = '#3f4a44'; c.fillRect(4, -6, 8, 12);
+            c.strokeStyle = '#4f9a72'; c.lineWidth = 2.2;
+            c.beginPath(); c.moveTo(-6, 0); c.lineTo(8, 0); c.stroke();
+            break;
+          case 'barracks':
+            c.fillStyle = '#4d5348'; c.fillRect(-11, -7, 22, 6);
+            c.fillStyle = '#3c4238'; c.fillRect(-5, 1, 10, 8);
+            c.fillStyle = col; c.fillRect(-3, 3, 6, 6);
+            break;
           case 'factory':
-            for (var s = 0; s < 3; s++) { c.beginPath(); c.moveTo(-12 + s * 9, 8); c.lineTo(-8 + s * 9, -6); c.lineTo(-4 + s * 9, 8); c.fill(); }
+            for (var sw = 0; sw < 3; sw++) {
+              c.fillStyle = sw % 2 ? '#5b646a' : '#4a5258';
+              c.beginPath();
+              c.moveTo(-13 + sw * 9, 8); c.lineTo(-9 + sw * 9, -8); c.lineTo(-5 + sw * 9, 8);
+              c.closePath(); c.fill();
+            }
             break;
           case 'airfield':
-            c.fillRect(-13, -3, 26, 8);
-            c.strokeStyle = '#ddd8c4'; c.lineWidth = 1.5; c.setLineDash([4, 3]);
-            c.beginPath(); c.moveTo(-11, 1); c.lineTo(11, 1); c.stroke(); c.setLineDash([]);
+            c.fillStyle = '#3f444a'; c.fillRect(-13, -5, 26, 11);
+            c.strokeStyle = 'rgba(236,230,206,0.8)'; c.lineWidth = 1.6;
+            c.setLineDash([5, 4]);
+            c.beginPath(); c.moveTo(-11, 0.5); c.lineTo(11, 0.5); c.stroke();
+            c.setLineDash([]);
             break;
-          case 'lab': c.fillStyle = '#9fd6e6'; c.beginPath(); c.arc(0, 2, 9, Math.PI, 0); c.fill(); break;
+          case 'lab':
+            c.fillStyle = '#48525c'; c.beginPath(); c.ellipse(0, 0, 9, 8, 0, 0, 6.283); c.fill();
+            c.fillStyle = '#9fd6e6'; c.beginPath(); c.ellipse(-1, -1, 6, 5, 0, 0, 6.283); c.fill();
+            c.fillStyle = 'rgba(255,255,255,0.5)'; c.beginPath(); c.ellipse(-3, -3, 2.2, 1.6, 0, 0, 6.283); c.fill();
+            break;
           case 'radar':
-            c.strokeStyle = '#9fd6e6'; c.lineWidth = 2;
-            c.beginPath(); c.arc(0, 6, 5, Math.PI, 0); c.stroke();
-            c.beginPath(); c.arc(0, 6, 9, Math.PI, 0); c.stroke();
-            c.beginPath(); c.arc(0, 6, 13, Math.PI, 0); c.stroke();
-            c.fillStyle = '#9fd6e6'; c.beginPath(); c.arc(0, 6, 2.5, 0, 6.283); c.fill();
+            c.fillStyle = '#3c444b'; c.beginPath(); c.ellipse(0, 5, 9, 4, 0, 0, 6.283); c.fill();
+            c.fillStyle = '#8d97a0'; c.beginPath(); c.ellipse(0, -1, 11, 4.5, -0.35, 0, 6.283); c.fill();
+            c.fillStyle = '#5d666e'; c.beginPath(); c.ellipse(0, 0.5, 11, 2.6, -0.35, 0, 6.283); c.fill();
+            c.strokeStyle = '#2a2e26'; c.lineWidth = 2;
+            c.beginPath(); c.moveTo(0, 2); c.lineTo(0, 6); c.stroke();
             break;
-          case 'bunker': c.beginPath(); c.moveTo(-11, -3); c.lineTo(11, -3); c.lineTo(14, 6); c.lineTo(-14, 6); c.closePath(); c.fill(); break;
-          case 'atgun': c.beginPath(); c.arc(0, 2, 8, 0, 6.283); c.fill(); c.fillRect(0, 0, 17, 3); break;
-          case 'aagun': c.beginPath(); c.arc(0, 4, 8, 0, 6.283); c.fill(); c.fillRect(-1, -14, 3, 16); c.fillRect(4, -12, 3, 14); break;
-          default: c.fillStyle = col; c.beginPath(); c.arc(0, 0, 8, 0, 6.283); c.fill();
+          case 'bunker':
+            c.fillStyle = '#4a5145';
+            c.beginPath(); c.moveTo(-10, -4); c.lineTo(10, -4); c.lineTo(13, 6); c.lineTo(-13, 6);
+            c.closePath(); c.fill();
+            c.fillStyle = '#171a15'; c.fillRect(-8, -1, 16, 3.5);
+            c.fillStyle = '#8b7f5f';
+            for (var sb = 0; sb < 4; sb++) { c.beginPath(); c.ellipse(-11 + sb * 7, 8, 4, 2.6, 0, 0, 6.283); c.fill(); }
+            break;
+          case 'atgun':
+            c.fillStyle = '#3c4137'; c.beginPath(); c.arc(-2, 2, 8, 0, 6.283); c.fill();
+            c.fillStyle = '#4d5346'; c.beginPath(); c.arc(-3, 0.5, 6, 0, 6.283); c.fill();
+            c.fillStyle = '#23261f'; c.fillRect(-2, 0, 18, 4);
+            break;
+          case 'aagun':
+            c.fillStyle = '#3c4137'; c.beginPath(); c.arc(0, 5, 8, 0, 6.283); c.fill();
+            c.fillStyle = '#23261f';
+            c.save(); c.rotate(-0.85);
+            c.fillRect(-1.6, -16, 3.2, 18); c.fillRect(3, -14, 3.2, 16);
+            c.restore();
+            break;
+          default:
+            c.fillStyle = col; c.beginPath(); c.arc(0, 0, 7, 0, 6.283); c.fill();
+            c.fillStyle = 'rgba(255,255,255,0.3)'; c.beginPath(); c.arc(-2, -2, 3, 0, 6.283); c.fill();
         }
+        c.restore();
         c.restore(); return;
       }
 
+      /* ---- units ---- */
       var d = IF.UNITS[id];
+
       if (d.cat === 'air') {
+        c.fillStyle = 'rgba(0,0,0,0.32)';
+        c.beginPath(); c.ellipse(4, 16, 15, 5, 0, 0, 6.283); c.fill();
+        c.translate(0, -4);
         c.rotate(-Math.PI / 2);
-        c.fillStyle = '#4a5a68';
+        c.fillStyle = legion ? '#6a6049' : '#55697a';
         c.beginPath();
-        c.moveTo(17, 0); c.lineTo(4, -4); c.lineTo(-15, -3); c.lineTo(-17, 0); c.lineTo(-15, 3); c.lineTo(4, 4);
+        c.moveTo(16, 0); c.lineTo(5, -4); c.lineTo(-13, -3); c.lineTo(-16, 0);
+        c.lineTo(-13, 3); c.lineTo(5, 4);
         c.closePath(); c.fill();
-        c.fillRect(-5, -17, 8, 34);
-        c.fillRect(-16, -9, 5, 18);
-        c.fillStyle = col; c.fillRect(-4, -16, 3, 6); c.fillRect(-4, 10, 3, 6);
-      } else if (d.armor === 'infantry') {
-        c.fillStyle = faction.id === 'legion' ? '#5a4a3c' : '#4a5c50';
-        c.beginPath(); c.ellipse(0, 4, 8, 11, 0, 0, 6.283); c.fill();
-        c.fillStyle = dark; c.beginPath(); c.arc(0, -8, 7, 0, 6.283); c.fill();
-        c.fillStyle = col; c.beginPath(); c.arc(0, -8, 4, 0, 6.283); c.fill();
-        c.strokeStyle = '#20231c'; c.lineWidth = 2.5;
-        c.beginPath(); c.moveTo(7, 8); c.lineTo(14, -8); c.stroke();
-        if (id === 'engineer') { c.fillStyle = '#d7b45a'; c.fillRect(-14, 0, 7, 7); }
-        if (id === 'sniper') { c.strokeStyle = '#20231c'; c.beginPath(); c.moveTo(7, 8); c.lineTo(17, -12); c.stroke(); }
-      } else {
-        c.fillStyle = '#22251f';
-        c.fillRect(-16, -12, 32, 4); c.fillRect(-16, 8, 32, 4);
-        c.fillStyle = faction.id === 'legion' ? '#514a3c' : '#4d5850';
-        c.fillRect(-16, -8, 32, 16);
-        if (d.harvest) {
-          c.fillStyle = id === 'truck' ? '#d4ab48' : '#39443f';
-          c.fillRect(-13, -5, 16, 10);
-        } else {
-          c.fillStyle = faction.id === 'legion' ? '#5c5445' : '#586359';
-          c.beginPath(); c.arc(-2, 0, 8, 0, 6.283); c.fill();
-          c.fillStyle = '#20231c';
-          c.fillRect(4, -2, id === 'artillery' ? 20 : 16, 4);
-        }
-        c.fillStyle = col; c.fillRect(-14, 4, 6, 3);
+        c.fillRect(-4, -16, 7, 32);
+        c.fillRect(-14, -8, 5, 16);
+        c.fillStyle = 'rgba(255,244,206,0.22)';
+        c.fillRect(-4, -16, 7, 3);
+        c.fillStyle = '#9fd6e6';
+        c.beginPath(); c.ellipse(6, 0, 3, 2, 0, 0, 6.283); c.fill();
+        c.fillStyle = col;
+        c.fillRect(-3, -15, 3, 5); c.fillRect(-3, 10, 3, 5);
+        if (id === 'bomber') { c.fillStyle = legion ? '#6a6049' : '#55697a'; c.fillRect(-2, -19, 5, 5); c.fillRect(-2, 14, 5, 5); }
+        c.restore(); return;
       }
+
+      if (d.armor === 'infantry') {
+        c.fillStyle = 'rgba(0,0,0,0.32)';
+        c.beginPath(); c.ellipse(3, 15, 10, 4, 0, 0, 6.283); c.fill();
+        var coat = legion ? '#6a5642' : '#556b5c';
+        var coatLo = legion ? '#4a3c2d' : '#3b4c41';
+        c.fillStyle = coatLo;
+        c.fillRect(-5, 4, 4, 10); c.fillRect(1.5, 4, 4, 10);
+        c.fillStyle = coat;
+        c.beginPath(); c.ellipse(0, -1, 8, 10, 0, 0, 6.283); c.fill();
+        c.fillStyle = 'rgba(255,244,206,0.20)';
+        c.beginPath(); c.ellipse(-2.5, -4, 4.5, 5, 0, 0, 6.283); c.fill();
+        c.fillStyle = dark;
+        c.beginPath(); c.arc(0, -13, 6.5, 0, 6.283); c.fill();
+        c.fillStyle = col;
+        c.beginPath(); c.arc(0, -13, 4, 0, 6.283); c.fill();
+        c.fillStyle = 'rgba(255,255,255,0.35)';
+        c.beginPath(); c.arc(-2, -15, 2, 0, 6.283); c.fill();
+        c.strokeStyle = '#1e211a'; c.lineWidth = 2.6;
+        c.beginPath();
+        if (id === 'sniper') { c.moveTo(8, 10); c.lineTo(15, -13); }
+        else if (id === 'at_inf') { c.moveTo(6, 8); c.lineTo(16, -8); }
+        else { c.moveTo(7, 9); c.lineTo(14, -8); }
+        c.stroke();
+        if (id === 'mg') { c.fillStyle = '#1e211a'; c.fillRect(8, -4, 5, 7); }
+        if (id === 'at_inf') { c.fillStyle = '#3d4335'; c.fillRect(9, -6, 8, 5); }
+        if (id === 'engineer') { c.fillStyle = '#e2c46a'; c.fillRect(-15, 0, 8, 8); }
+        c.restore(); return;
+      }
+
+      /* ---- vehicles ---- */
+      c.fillStyle = 'rgba(0,0,0,0.34)';
+      c.beginPath(); c.ellipse(4, 12, 20, 7, 0, 0, 6.283); c.fill();
+      c.translate(0, -3);
+      var hull = legion ? '#6b6049' : '#5c6a5f';
+      var hullHi = legion ? '#847860' : '#75857a';
+      c.fillStyle = '#1d201a';
+      c.fillRect(-18, -13, 36, 4.5);
+      c.fillRect(-18, 8.5, 36, 4.5);
+      c.fillStyle = 'rgba(255,255,255,0.10)';
+      for (var tk = -18; tk < 18; tk += 5) { c.fillRect(tk, -13, 2.2, 4.5); c.fillRect(tk, 8.5, 2.2, 4.5); }
+      c.fillStyle = hull;
+      c.beginPath();
+      c.moveTo(-18, -9); c.lineTo(14, -7.5); c.lineTo(18, 0); c.lineTo(14, 7.5); c.lineTo(-18, 9);
+      c.closePath(); c.fill();
+      c.fillStyle = hullHi;
+      c.fillRect(-16, -7, 30, 6);
+      if (d.harvest) {
+        c.fillStyle = id === 'truck' ? '#dcb14a' : '#3c463f';
+        c.fillRect(-15, -6, 17, 12);
+        c.fillStyle = 'rgba(255,255,255,0.25)';
+        c.fillRect(-15, -6, 17, 3);
+        c.fillStyle = dark; c.fillRect(9, -8, 8, 16);
+      } else {
+        var tr = id === 'heavy' ? 10 : (id === 'light' ? 7.5 : 8.6);
+        c.fillStyle = 'rgba(0,0,0,0.28)';
+        c.beginPath(); c.arc(-1, 2.5, tr, 0, 6.283); c.fill();
+        c.fillStyle = legion ? '#77694f' : '#68786c';
+        c.beginPath(); c.arc(-2, 0, tr, 0, 6.283); c.fill();
+        c.fillStyle = 'rgba(255,244,206,0.24)';
+        c.beginPath(); c.arc(-3, -1.6, tr * 0.8, Math.PI, 0); c.fill();
+        c.fillStyle = '#1e211a';
+        c.fillRect(tr - 4, -2.2, id === 'artillery' ? 25 : (id === 'heavy' ? 22 : 17), 4.4);
+        if (id === 'artillery') { c.fillStyle = '#2d3229'; c.fillRect(-13, -10, 5, 20); }
+        if (id === 'heavy') { c.fillStyle = 'rgba(0,0,0,0.3)'; c.fillRect(-14, -8, 3.5, 16); c.fillRect(-8, -8, 3.5, 16); }
+      }
+      c.fillStyle = col;
+      c.fillRect(-16, 5, 8, 3);
       c.restore();
     }
   };

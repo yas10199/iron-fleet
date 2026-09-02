@@ -174,6 +174,17 @@
           r: r * IF.rand(0.5, 0.9), life: IF.rand(1.0, 2.0), age: 0, vy: -8
         });
       }
+      // lumps of metal and earth thrown clear of the blast
+      var chunks = Math.min(10, 2 + (r / 9) | 0);
+      for (var ch = 0; ch < chunks; ch++) {
+        var ca = Math.random() * Math.PI * 2, cs = IF.rand(40, 60 + r * 2);
+        this.push(game, {
+          t: 'chunk', x: x, y: y, vx: Math.cos(ca) * cs, vy: Math.sin(ca) * cs,
+          vz: IF.rand(40, 90), z: 0, rot: Math.random() * 6.283,
+          spin: IF.rand(-9, 9), size: IF.rand(2.5, 5.5),
+          life: IF.rand(0.7, 1.3), age: 0
+        });
+      }
     },
     dust: function (game, x, y) {
       this.push(game, { t: 'dust', x: x, y: y, r: IF.rand(3, 6), life: 0.7, age: 0 });
@@ -190,7 +201,13 @@
         var e = list[i];
         e.age += dt;
         if (e.t === 'spark') { e.x += e.vx * dt; e.y += e.vy * dt; e.vx *= 0.94; e.vy = e.vy * 0.94 + 40 * dt; }
-        if (e.t === 'smoke') { e.y += e.vy * dt; e.r += 9 * dt; }
+        if (e.t === 'chunk') {
+          e.x += e.vx * dt; e.y += e.vy * dt;
+          e.z += e.vz * dt; e.vz -= 190 * dt;
+          if (e.z < 0) { e.z = 0; e.vz *= -0.35; e.vx *= 0.5; e.vy *= 0.5; }
+          e.vx *= 0.99; e.vy *= 0.99;
+        }
+        if (e.t === 'smoke') { e.y += e.vy * dt; e.x += 11 * dt; e.r += 9 * dt; }
         if (e.t === 'text') { e.y -= 16 * dt; }
         if (e.age >= e.life) list.splice(i, 1);
       }

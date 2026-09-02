@@ -421,6 +421,8 @@
     var ny = this.y + Math.sin(this.facing) * sp * dt;
     var dom = this.def.domain;
 
+    this.walk = (this.walk || 0) + sp * dt * 0.42;
+    this.lastMoveT = game.time;
     if (game.map.passWorld(nx, ny, dom)) {
       this.x = nx; this.y = ny; this.stuck = 0;
     } else if (game.map.passWorld(nx, this.y, dom)) {

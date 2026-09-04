@@ -41,6 +41,23 @@
         Array.prototype.forEach.call(self.el.tabs.children, function (c) { c.classList.toggle('on', c.dataset.tab === self.tab); });
       });
 
+      document.getElementById('btnSpeed').addEventListener('click', function () {
+        var g = IF.game; if (!g) return;
+        var steps = [1, 1.5, 2];
+        var i = (steps.indexOf(g.speed) + 1) % steps.length;
+        g.speed = steps[i];
+        this.textContent = 'SPEED ' + g.speed + 'x';
+      });
+      document.getElementById('btnFx').addEventListener('click', function () {
+        var r = IF.render;
+        if (r.autoQuality) { r.autoQuality = false; r.quality = 'low'; this.textContent = 'FX LOW'; }
+        else if (r.quality === 'low') { r.quality = 'high'; this.textContent = 'FX HIGH'; }
+        else { r.autoQuality = true; this.textContent = 'FX AUTO'; }
+      });
+      document.getElementById('btnHide').addEventListener('click', function () {
+        document.body.classList.toggle('uihidden');
+        this.textContent = document.body.classList.contains('uihidden') ? 'SHOW UI' : 'HIDE UI';
+      });
       document.getElementById('btnMusic').addEventListener('click', function () {
         IF.audio.setMusic(!IF.audio.musicOn);
         this.textContent = IF.audio.musicOn ? 'MUSIC ON' : 'MUSIC OFF';
@@ -285,10 +302,13 @@
     /* ----------------------------------------------------- selection */
     drawSelection: function (g) {
       var s = g.selection.filter(function (e) { return !e.dead; });
+      var panel = document.getElementById('selpanel');
       if (!s.length) {
-        this.el.sel.innerHTML = '<div class="dim">No selection — drag a box over your units, or click a building.</div>';
+        panel.classList.add('empty');
+        this.el.sel.innerHTML = '';
         return;
       }
+      panel.classList.remove('empty');
       var e = s[0];
       var html = '';
 
@@ -318,7 +338,22 @@
         if (e.kind === 'building' && e.def.produces) html += '<div class="selstat dim">Right-click the map to set a rally point.</div>';
         html += '<div class="seldesc">' + (d.desc || '') + '</div>';
       }
+      if (s.length === 1 && e.kind === 'building' && e.owner === 0 && e.type !== 'hq') {
+        var back = Math.round((e.def.cost.s || 0) * (e.complete ? 0.5 : 0.5 * e.progress));
+        html += '<button class="sellbtn" data-sell="1">DISMANTLE  <i>+' + back + '</i></button>';
+      }
       this.el.sel.innerHTML = html;
+
+      if (!this._sellBound) {
+        this._sellBound = true;
+        this.el.sel.addEventListener('click', function (ev) {
+          if (!ev.target.closest('[data-sell]')) return;
+          var g = IF.game;
+          if (!g) return;
+          var b = g.selection.filter(function (x) { return x.kind === 'building' && x.owner === 0; })[0];
+          if (b) g.sell(0, b);
+        });
+      }
     },
 
     /* ------------------------------------------------------ messages */
@@ -390,14 +425,14 @@
         c.lineTo(-w / 2 + 8, h / 2 + 5); c.lineTo(-w / 2, h / 2);
         c.closePath(); c.fill();
         // wall
-        c.fillStyle = legion ? '#5a5245' : '#5c6469';
+        c.fillStyle = legion ? '#5a5245' : '#59634a';
         c.fillRect(-w / 2, h / 2 - H, w, H);
         c.fillStyle = 'rgba(20,24,28,0.55)';
         for (var wx = -w / 2 + 3; wx < w / 2 - 4; wx += 8) c.fillRect(wx, h / 2 - H + 4, 4, 4);
         // roof
-        c.fillStyle = legion ? '#6d6353' : '#6e777d';
+        c.fillStyle = legion ? '#6d6353' : '#6b7554';
         c.fillRect(-w / 2, -h / 2 - H, w, h);
-        c.fillStyle = legion ? '#857a67' : '#87919a';
+        c.fillStyle = legion ? '#857a67' : '#83906a';
         c.fillRect(-w / 2 + 1.5, -h / 2 - H + 1.5, w - 3, h - 4);
         c.fillStyle = 'rgba(255,244,206,0.20)';
         c.fillRect(-w / 2 + 1.5, -h / 2 - H + 1.5, w - 3, 2.5);
@@ -495,7 +530,7 @@
         c.beginPath(); c.ellipse(4, 16, 15, 5, 0, 0, 6.283); c.fill();
         c.translate(0, -4);
         c.rotate(-Math.PI / 2);
-        c.fillStyle = legion ? '#6a6049' : '#55697a';
+        c.fillStyle = legion ? '#6a6049' : '#5b6742';
         c.beginPath();
         c.moveTo(16, 0); c.lineTo(5, -4); c.lineTo(-13, -3); c.lineTo(-16, 0);
         c.lineTo(-13, 3); c.lineTo(5, 4);
@@ -508,15 +543,15 @@
         c.beginPath(); c.ellipse(6, 0, 3, 2, 0, 0, 6.283); c.fill();
         c.fillStyle = col;
         c.fillRect(-3, -15, 3, 5); c.fillRect(-3, 10, 3, 5);
-        if (id === 'bomber') { c.fillStyle = legion ? '#6a6049' : '#55697a'; c.fillRect(-2, -19, 5, 5); c.fillRect(-2, 14, 5, 5); }
+        if (id === 'bomber') { c.fillStyle = legion ? '#6a6049' : '#5b6742'; c.fillRect(-2, -19, 5, 5); c.fillRect(-2, 14, 5, 5); }
         c.restore(); return;
       }
 
       if (d.armor === 'infantry') {
         c.fillStyle = 'rgba(0,0,0,0.32)';
         c.beginPath(); c.ellipse(3, 15, 10, 4, 0, 0, 6.283); c.fill();
-        var coat = legion ? '#6a5642' : '#556b5c';
-        var coatLo = legion ? '#4a3c2d' : '#3b4c41';
+        var coat = legion ? '#6a5642' : '#5c6740';
+        var coatLo = legion ? '#4a3c2d' : '#3f492a';
         c.fillStyle = coatLo;
         c.fillRect(-5, 4, 4, 10); c.fillRect(1.5, 4, 4, 10);
         c.fillStyle = coat;
@@ -545,8 +580,8 @@
       c.fillStyle = 'rgba(0,0,0,0.34)';
       c.beginPath(); c.ellipse(4, 12, 20, 7, 0, 0, 6.283); c.fill();
       c.translate(0, -3);
-      var hull = legion ? '#6b6049' : '#5c6a5f';
-      var hullHi = legion ? '#847860' : '#75857a';
+      var hull = legion ? '#6b6049' : '#5e6a44';
+      var hullHi = legion ? '#847860' : '#7b8a58';
       c.fillStyle = '#1d201a';
       c.fillRect(-18, -13, 36, 4.5);
       c.fillRect(-18, 8.5, 36, 4.5);
@@ -568,7 +603,7 @@
         var tr = id === 'heavy' ? 10 : (id === 'light' ? 7.5 : 8.6);
         c.fillStyle = 'rgba(0,0,0,0.28)';
         c.beginPath(); c.arc(-1, 2.5, tr, 0, 6.283); c.fill();
-        c.fillStyle = legion ? '#77694f' : '#68786c';
+        c.fillStyle = legion ? '#77694f' : '#6d7a4e';
         c.beginPath(); c.arc(-2, 0, tr, 0, 6.283); c.fill();
         c.fillStyle = 'rgba(255,244,206,0.24)';
         c.beginPath(); c.arc(-3, -1.6, tr * 0.8, Math.PI, 0); c.fill();

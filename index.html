@@ -32,6 +32,9 @@
     <div class="rd"><span class="lbl">TIME</span><span class="val" id="rTimer">00:00</span></div>
   </div>
   <div class="tools">
+    <button id="btnSpeed" class="tbtn">SPEED 1x</button>
+    <button id="btnFx" class="tbtn">FX AUTO</button>
+    <button id="btnHide" class="tbtn">HIDE UI</button>
     <button id="btnHelp" class="tbtn">CONTROLS</button>
     <button id="btnVoice" class="tbtn">VOICE ON</button>
     <button id="btnMusic" class="tbtn">MUSIC ON</button>
@@ -67,6 +70,7 @@
     <div class="panelcap">SELECTION</div>
     <div id="selinfo"><div class="dim">No selection.</div></div>
     <div class="touchrow">
+      <button id="btnTouchAttack" class="tbtn small atk">ATTACK</button>
       <button id="btnTouchSelect" class="tbtn small">BOX SELECT</button>
       <button id="btnTouchStop" class="tbtn small">STOP</button>
     </div>
@@ -77,47 +81,71 @@
 
 <!-- ============ MAIN MENU ============ -->
 <div id="mainmenu">
-  <div class="menucard">
-    <h1><span>IRON</span><em>FRONT</em></h1>
-    <p class="tagline">Two armies. One river. One headquarters left standing.</p>
+  <div class="menuArt"></div>
+  <div class="menuScrim"></div>
 
-    <div class="pick">
-      <h2>Choose your army</h2>
-      <div class="row">
-        <button class="fac on" data-faction="alliance">
-          <b>THE ALLIANCE</b>
-          <small>Builds fast, flies well, flexible infantry. Armour is a little thin.</small>
-        </button>
-        <button class="fac" data-faction="legion">
-          <b>THE IRON LEGION</b>
-          <small>Heavy tanks and hard emplacements. Slower, and technology costs more.</small>
-        </button>
-      </div>
+  <div class="menuInner">
+    <header class="menuTitle">
+      <h1><span>IRON</span><em>FRONT</em></h1>
+      <p class="tagline">Two armies. One river. One headquarters left standing.</p>
+    </header>
+
+    <div class="menucard">
+
+      <section class="pick">
+        <h2><span class="num">1</span> Choose your army</h2>
+        <div class="row">
+          <button class="fac on" data-faction="alliance">
+            <span class="facBar alliance"></span>
+            <b>The Alliance</b>
+            <small>Builds fast, flies well, flexible infantry. Armour is a little thin.</small>
+            <span class="tick">SELECTED</span>
+          </button>
+          <button class="fac" data-faction="legion">
+            <span class="facBar legion"></span>
+            <b>The Iron Legion</b>
+            <small>Heavy tanks and hard emplacements. Slower, and technology costs more.</small>
+            <span class="tick">SELECTED</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="pick">
+        <h2><span class="num">2</span> Enemy commander</h2>
+        <div class="row three">
+          <button class="diff" data-diff="easy"><b>Easy</b><small>Builds slowly. Attacks rarely.</small><span class="tick">SELECTED</span></button>
+          <button class="diff on" data-diff="normal"><b>Normal</b><small>Steady economy. Regular attacks.</small><span class="tick">SELECTED</span></button>
+          <button class="diff" data-diff="hard"><b>Hard</b><small>Rich, researches everything, hits hard.</small><span class="tick">SELECTED</span></button>
+        </div>
+      </section>
+
+      <section class="pick">
+        <h2><span class="num">3</span> Opening</h2>
+        <div class="row">
+          <button class="mode on" data-start="standard"><b>Standard</b><small>Normal starting supplies. Build your base from the ground up.</small><span class="tick">SELECTED</span></button>
+          <button class="mode" data-start="fast"><b>Fast Start</b><small>Double resources to open with. Straight into the fighting.</small><span class="tick">SELECTED</span></button>
+        </div>
+      </section>
+
+      <button id="btnStart" class="start">START THE BATTLE</button>
+
+      <ul class="brief">
+        <li><b>The map starts dark.</b> Scout it — you only see what your units are looking at.</li>
+        <li><b>Build a Radar Station</b> or the sector map stays offline. It needs power.</li>
+        <li><b>Units earn promotions</b> from kills. Veterans hit harder, Elites heal themselves.</li>
+        <li><b>Tanks crush infantry.</b> Screen your riflemen or lose them under the tracks.</li>
+        <li><b>Command Powers</b> charge over time: recon, repairs, barrages, paradrops and worse.</li>
+      </ul>
+
+      <p class="fineprint">Left-click selects. Right-click commands. Destroy the enemy Headquarters to win.</p>
     </div>
-
-    <div class="pick">
-      <h2>Enemy commander</h2>
-      <div class="row">
-        <button class="diff" data-diff="easy"><b>EASY</b><small>Builds slowly, attacks rarely.</small></button>
-        <button class="diff on" data-diff="normal"><b>NORMAL</b><small>Steady economy, regular attacks.</small></button>
-        <button class="diff" data-diff="hard"><b>HARD</b><small>Rich, researches everything, attacks hard.</small></button>
-      </div>
-    </div>
-
-    <button id="btnStart" class="start">START THE BATTLE</button>
-    <ul class="brief">
-      <li><b>The map starts dark.</b> Scout it. You only see what your units are looking at.</li>
-      <li><b>Build a Radar Station</b> or the sector map stays offline — and it needs power.</li>
-      <li><b>Units earn promotions</b> from kills. Veterans hit harder; Elites heal themselves.</li>
-      <li><b>Tanks crush infantry.</b> Screen your riflemen or lose them under the tracks.</li>
-      <li><b>Command Powers</b> charge over time: recon, repairs, barrages, paradrops, and worse.</li>
-    </ul>
-    <p class="fineprint">Left-click selects, right-click commands. Destroy the enemy Headquarters to win.</p>
   </div>
 </div>
 
 <!-- ============ RESULTS ============ -->
 <div id="results" class="hidden">
+  <div class="menuArt dark"></div>
+  <div class="menuScrim"></div>
   <div class="menucard">
     <h1 id="resultTitle">VICTORY</h1>
     <div class="panelcap">AFTER-ACTION REPORT</div>
@@ -128,6 +156,8 @@
 
 <!-- ============ CONTROLS ============ -->
 <div id="help" class="hidden">
+  <div class="menuArt dark"></div>
+  <div class="menuScrim"></div>
   <div class="menucard">
     <h1>CONTROLS</h1>
     <div class="helpgrid">
@@ -139,6 +169,9 @@
       <div><b>Right-click a resource</b><span>Send a truck or tanker to collect it</span></div>
       <div><b>Right-click while a building is selected</b><span>Set the rally point for new units</span></div>
       <div><b>A then click</b><span>Attack-move: advance and shoot anything on the way</span></div>
+      <div><b>ATTACK button, or A then click</b><span>Order your selected units to attack a target</span></div>
+      <div><b>Tab, or HIDE UI</b><span>Clear the panels off the screen to see the map</span></div>
+      <div><b>E</b><span>Select your entire army at once</span></div>
       <div><b>S</b><span>Stop</span></div>
       <div><b>H</b><span>Jump to your Headquarters</span></div>
       <div><b>Spacebar</b><span>Jump to wherever your base was last attacked</span></div>

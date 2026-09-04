@@ -83,6 +83,75 @@
 
     heightOf: function (type) { return HEIGHT[type] || 24; },
 
+    /* ------------------------------------------------------------------
+       LIGHTING
+       Fires, explosions and muzzle flashes now actually throw light onto
+       the ground and onto whatever is standing near them. The glow is one
+       pre-baked sprite, stamped with additive blending, so a battlefield
+       full of burning wrecks costs almost nothing to light.
+       ------------------------------------------------------------------ */
+    bakeLights: function () {
+      var mk = function (inner, mid) {
+        var c = document.createElement('canvas');
+        c.width = c.height = 256;
+        var x = c.getContext('2d');
+        var g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+        g.addColorStop(0, inner);
+        g.addColorStop(0.35, mid);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        x.fillStyle = g;
+        x.fillRect(0, 0, 256, 256);
+        return c;
+      };
+      this.lightFire = mk('rgba(255,196,96,0.95)', 'rgba(206,102,30,0.36)');
+      this.lightFlash = mk('rgba(255,244,214,0.95)', 'rgba(255,190,110,0.30)');
+    },
+
+    /* Gathers everything currently giving off light and stamps it down. */
+    lightPass: function (g, ctx) {
+      if (!this.lightFire) this.bakeLights();
+      var lights = [], i;
+
+      // blasts in progress
+      for (i = 0; i < g.effects.length; i++) {
+        var e = g.effects[i];
+        if (e.t === 'boom') {
+          var k = e.age / e.life;
+          lights.push({ x: e.x, y: e.y, r: e.r * (5 + k * 4), a: (1 - k) * 0.95, warm: 0 });
+        } else if (e.t === 'muzzle') {
+          lights.push({ x: e.x, y: e.y, r: 58, a: (1 - e.age / e.life) * 0.55, warm: 0 });
+        }
+      }
+      // burning buildings
+      for (i = 0; i < g.buildings.length; i++) {
+        var b = g.buildings[i];
+        if (b.dead || !b.complete || b.hp > b.maxHp * 0.5) continue;
+        if (b.owner !== 0 && !g.fog.canSee(b)) continue;
+        var sev = 1 - b.hp / b.maxHp;
+        var fl = 0.75 + 0.25 * Math.sin(g.time * 9 + b.id);
+        lights.push({ x: b.x, y: b.y - (HEIGHT[b.type] || 24) * 0.4, r: 90 + sev * 130, a: sev * fl * 0.7, warm: 1 });
+      }
+      // burning hulls
+      for (i = 0; i < g.decals.length; i++) {
+        var d = g.decals[i];
+        if (d.type !== 'wreck' || d.age > 14) continue;
+        var fw = 0.7 + 0.3 * Math.sin(g.time * 7 + d.x);
+        lights.push({ x: d.x, y: d.y, r: 70, a: (1 - d.age / 14) * fw * 0.6, warm: 1 });
+      }
+
+      if (!lights.length) return;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (i = 0; i < lights.length; i++) {
+        var L = lights[i];
+        if (!this.onScreen(g, L.x, L.y, L.r)) continue;
+        ctx.globalAlpha = IF.clamp(L.a, 0, 1);
+        var img = L.warm ? this.lightFire : this.lightFlash;
+        ctx.drawImage(img, L.x - L.r, L.y - L.r, L.r * 2, L.r * 2);
+      }
+      ctx.restore();
+    },
+
     init: function (canvas, mini) {
       this.canvas = canvas;
       this.ctx = canvas.getContext('2d');
@@ -156,7 +225,21 @@
     },
 
     /* ================================================================= */
+    quality: 'high',
+    autoQuality: true,
+    _fms: 16,
+
+    /* Watches how long frames are actually taking and quietly drops the
+       expensive extras — lighting, haze, some particles — if the machine is
+       struggling. Comes back up on its own when there is headroom again. */
+    gradeQuality: function () {
+      if (!this.autoQuality) return;
+      if (this.quality === 'high' && this._fms > 26) this.quality = 'low';
+      else if (this.quality === 'low' && this._fms < 17) this.quality = 'high';
+    },
+
     draw: function (g, dt) {
+      var t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : 0;
       var ctx = this.ctx;
       var z = g.cam.zoom || 1;
       g.viewW = this.cw / z; g.viewH = this.ch / z;
@@ -221,6 +304,7 @@
       }
 
       this.drawProjectiles(g, ctx);
+      if (this.quality === 'high') this.lightPass(g, ctx);
       this.drawEffects(g, ctx, true);
       this.drawFog(g, ctx);
       this.drawSelection(g, ctx);
@@ -230,6 +314,12 @@
 
       ctx.restore();
       this.postFx(g, ctx);
+
+      if (t0) {
+        var el = performance.now() - t0;
+        this._fms = this._fms * 0.92 + el * 0.08;
+        this.gradeQuality();
+      }
 
       this.miniTimer -= dt;
       if (this.miniTimer <= 0) { this.miniTimer = 0.12; this.drawMinimap(g); }
@@ -258,6 +348,41 @@
     CHUNK: 512,
     groundCache: null,
     chunkOrder: null,
+
+    /* ------------------------------------------------------------------
+       RELIEF
+       A slow two-octave noise field over the whole map, used to shade the
+       ground light on the rises and dark in the hollows, with a lit edge on
+       every slope facing the sun. The map stops being a flat sheet.
+       ------------------------------------------------------------------ */
+    buildRelief: function (g) {
+      var W = g.map.w, H = g.map.h;
+      var rng = IF.makeRng(31337);
+      var field = new Float32Array(W * H);
+
+      var octave = function (step, amp) {
+        var gw = Math.ceil(W / step) + 2, gh = Math.ceil(H / step) + 2;
+        var grid = new Float32Array(gw * gh);
+        for (var i = 0; i < grid.length; i++) grid[i] = rng() * 2 - 1;
+        for (var y = 0; y < H; y++) {
+          var gy = y / step, y0 = Math.floor(gy), fy = gy - y0;
+          fy = fy * fy * (3 - 2 * fy);
+          for (var x = 0; x < W; x++) {
+            var gx = x / step, x0 = Math.floor(gx), fx = gx - x0;
+            fx = fx * fx * (3 - 2 * fx);
+            var a = grid[y0 * gw + x0], b = grid[y0 * gw + x0 + 1];
+            var c = grid[(y0 + 1) * gw + x0], d = grid[(y0 + 1) * gw + x0 + 1];
+            var top = a + (b - a) * fx, bot = c + (d - c) * fx;
+            field[y * W + x] += (top + (bot - top) * fy) * amp;
+          }
+        }
+      };
+      octave(11, 0.68);
+      octave(4.5, 0.26);
+      octave(2.2, 0.10);
+      this.relief = field;
+      this._reliefFor = g;
+    },
 
     invalidateGround: function () {
       this.groundCache = null;
@@ -309,6 +434,7 @@
       var x1 = Math.min(map.w - 1, Math.ceil((ox + w) / T2) + 1);
       var y1 = Math.min(map.h - 1, Math.ceil((oy + h) / T2) + 1);
       this.paintTiles(g, ctx, x0, y0, x1, y1);
+      this.paintFields(g, ctx, ox, oy, w, h);
       this.paintTrees(g, ctx, x0, y0, x1, y1);
 
       // static battlefield clutter, baked in with the ground
@@ -321,6 +447,7 @@
 
     paintTiles: function (g, ctx, x0, y0, x1, y1) {
       var map = g.map;
+      if (this._reliefFor !== g) this.buildRelief(g);
       // Batch tiles by texture: one fillStyle change per terrain type.
       var groups = {}, tx, ty, i, t, key;
       for (ty = y0; ty <= y1; ty++) {
@@ -334,6 +461,28 @@
         ctx.fillStyle = this.pat[key];
         var arr = groups[key];
         for (i = 0; i < arr.length; i += 2) ctx.fillRect(arr[i] * T, arr[i + 1] * T, T, T);
+      }
+
+      // Relief shading, before the edge details so banks and roads sit on top.
+      var W2 = map.w, rel = this.relief;
+      for (ty = y0; ty <= y1; ty++) {
+        for (tx = x0; tx <= x1; tx++) {
+          i = ty * W2 + tx;
+          if (map.tiles[i] === IF.T.WATER) continue;
+          var hgt = rel[i];
+          // slope facing the sun (up and to the left) catches the light
+          var up = rel[(ty > 0 ? ty - 1 : ty) * W2 + tx];
+          var lf = rel[ty * W2 + (tx > 0 ? tx - 1 : tx)];
+          var slope = ((hgt - up) + (hgt - lf)) * 1.9;
+          var shade = hgt * 0.13 + slope * 0.5;
+          if (shade > 0.012) {
+            ctx.fillStyle = 'rgba(255,244,206,' + Math.min(0.24, shade * 0.5).toFixed(3) + ')';
+            ctx.fillRect(tx * T, ty * T, T, T);
+          } else if (shade < -0.012) {
+            ctx.fillStyle = 'rgba(22,26,16,' + Math.min(0.30, -shade * 0.6).toFixed(3) + ')';
+            ctx.fillRect(tx * T, ty * T, T, T);
+          }
+        }
       }
 
       // Second pass: the details that make edges read as edges.
@@ -429,24 +578,56 @@
           var i = ty * map.w + tx;
           if (map.tiles[i] !== IF.T.FOREST) continue;
           var d = map.detail[i], px = tx * T, py = ty * T;
-          this.tree(ctx, px + 10 + d, py + 20, 9 + (d % 3));
-          this.tree(ctx, px + 24, py + 9 + (d % 4) * 2, 7 + (d % 2));
+          // undergrowth first, so the trunks rise out of something
+          ctx.fillStyle = 'rgba(46,60,32,0.55)';
+          ctx.beginPath();
+          ctx.ellipse(px + 16, py + 22, 15, 7, 0, 0, 6.283);
+          ctx.fill();
+          var conifer = ((tx * 7 + ty * 13) % 5) < 2;
+          this.tree(ctx, px + 10 + d, py + 21, 9 + (d % 3), conifer);
+          this.tree(ctx, px + 24, py + 10 + (d % 4) * 2, 7 + (d % 2), !conifer);
         }
       }
     },
 
-    tree: function (ctx, x, y, r) {
-      var lift = r * 1.5;
-      ctx.fillStyle = 'rgba(24,30,16,0.40)';
-      ctx.beginPath(); ctx.ellipse(x + r * 0.5, y + 2, r * 1.05, r * 0.5, 0, 0, 6.283); ctx.fill();
+    tree: function (ctx, x, y, r, conifer) {
+      var lift = r * 1.6;
+      ctx.fillStyle = 'rgba(20,26,14,0.42)';
+      ctx.beginPath();
+      ctx.ellipse(x + r * 0.6, y + 2, r * 1.1, r * 0.5, 0, 0, 6.283);
+      ctx.fill();
       ctx.fillStyle = '#3b3020';
-      ctx.fillRect(x - 1.6, y - lift * 0.5, 3.2, lift * 0.55);
-      ctx.fillStyle = PAL.canopyLo;
-      ctx.beginPath(); ctx.arc(x, y - lift, r, 0, 6.283); ctx.fill();
-      ctx.fillStyle = PAL.canopy;
-      ctx.beginPath(); ctx.arc(x - r * 0.12, y - lift - r * 0.12, r * 0.88, 0, 6.283); ctx.fill();
-      ctx.fillStyle = PAL.canopyHi;
-      ctx.beginPath(); ctx.arc(x - r * 0.34, y - lift - r * 0.38, r * 0.45, 0, 6.283); ctx.fill();
+      ctx.fillRect(x - 1.7, y - lift * 0.55, 3.4, lift * 0.6);
+      ctx.fillStyle = '#4a3c27';
+      ctx.fillRect(x - 1.7, y - lift * 0.55, 1.4, lift * 0.6);
+
+      if (conifer) {
+        // three stacked skirts of needles
+        for (var k = 0; k < 3; k++) {
+          var ky = y - lift * (0.45 + k * 0.32);
+          var kr = r * (1.05 - k * 0.24);
+          ctx.fillStyle = k === 2 ? PAL.canopyHi : (k === 1 ? PAL.canopy : PAL.canopyLo);
+          ctx.beginPath();
+          ctx.moveTo(x - kr, ky);
+          ctx.lineTo(x, ky - kr * 1.35);
+          ctx.lineTo(x + kr, ky);
+          ctx.closePath();
+          ctx.fill();
+        }
+      } else {
+        ctx.fillStyle = PAL.canopyLo;
+        ctx.beginPath();
+        ctx.arc(x, y - lift, r, 0, 6.283);
+        ctx.arc(x - r * 0.55, y - lift + r * 0.35, r * 0.62, 0, 6.283);
+        ctx.arc(x + r * 0.55, y - lift + r * 0.3, r * 0.58, 0, 6.283);
+        ctx.fill();
+        ctx.fillStyle = PAL.canopy;
+        ctx.beginPath(); ctx.arc(x - r * 0.14, y - lift - r * 0.14, r * 0.85, 0, 6.283); ctx.fill();
+        ctx.fillStyle = PAL.canopyHi;
+        ctx.beginPath(); ctx.arc(x - r * 0.36, y - lift - r * 0.4, r * 0.44, 0, 6.283); ctx.fill();
+        ctx.fillStyle = 'rgba(180,205,120,0.35)';
+        ctx.beginPath(); ctx.arc(x - r * 0.46, y - lift - r * 0.5, r * 0.2, 0, 6.283); ctx.fill();
+      }
     },
 
     isWater: function (map, tx, ty) {
@@ -575,9 +756,107 @@
         if (rng() < 0.6) put(wx + 1, wy, 'crater');
       }
 
+      /* --- cultivated fields ---------------------------------------
+         Ploughed strips with hedges round them. Europe in 1944 was farmland
+         with a war fought across it, not open moor, and nothing else adds
+         this much structure to the ground for so little cost. */
+      var fields = [];
+      for (var ft = 0; ft < 260 && fields.length < 18; ft++) {
+        var fw = 7 + Math.floor(rng() * 7), fh = 5 + Math.floor(rng() * 5);
+        var fx0 = 3 + Math.floor(rng() * (W - fw - 6));
+        var fy0 = 3 + Math.floor(rng() * (H - fh - 6));
+        // most of the plot has to be workable ground, but a lane or a copse
+        // cutting a corner off is fine — that is what real fields look like
+        var okTiles = 0, allTiles = 0;
+        for (var cy = fy0; cy < fy0 + fh; cy++)
+          for (var cx = fx0; cx < fx0 + fw; cx++) { allTiles++; if (open(cx, cy)) okTiles++; }
+        var clear = okTiles / allTiles > 0.72;
+        // keep them off the two starting positions
+        for (var bi = 0; bi < map.bases.length && clear; bi++) {
+          var bxx = map.bases[bi].tx, byy = map.bases[bi].ty;
+          if (fx0 < bxx + 12 && fx0 + fw > bxx - 8 && fy0 < byy + 12 && fy0 + fh > byy - 8) clear = false;
+        }
+        if (!clear) continue;
+        var overlap = false;
+        for (var q = 0; q < fields.length; q++) {
+          var o2 = fields[q];
+          if (fx0 < o2.x1 + 2 && fx0 + fw > o2.x0 - 2 && fy0 < o2.y1 + 2 && fy0 + fh > o2.y0 - 2) overlap = true;
+        }
+        if (overlap) continue;
+
+        fields.push({
+          x0: fx0, y0: fy0, x1: fx0 + fw, y1: fy0 + fh,
+          vert: rng() < 0.5, tone: rng()
+        });
+
+        // hedge the boundary, with a gate gap on one side
+        var gap = Math.floor(rng() * fw);
+        for (var hx = fx0; hx < fx0 + fw; hx++) {
+          if (hx - fx0 !== gap) put(hx, fy0 - 1, 'hedge', { horiz: 1 });
+          put(hx, fy0 + fh, 'hedge', { horiz: 1 });
+        }
+        for (var hy = fy0; hy < fy0 + fh; hy++) {
+          put(fx0 - 1, hy, 'hedge', { horiz: 0 });
+          put(fx0 + fw, hy, 'hedge', { horiz: 0 });
+        }
+        if (rng() < 0.55) put(fx0 + 1 + Math.floor(rng() * (fw - 2)), fy0 + 1 + Math.floor(rng() * (fh - 2)), 'hay');
+      }
+      this.fields = fields;
+
       props.sort(function (m, n) { return m.y - n.y; });
       this.scatter = props;
       this._scatterFor = g;
+    },
+
+    /* Ploughed soil, drawn inside each field boundary. */
+    paintFields: function (g, ctx, ox, oy, w, h) {
+      if (!this.fields) return;
+      for (var i = 0; i < this.fields.length; i++) {
+        var fd = this.fields[i];
+        var px = fd.x0 * T, py = fd.y0 * T;
+        var pw = (fd.x1 - fd.x0) * T, phh = (fd.y1 - fd.y0) * T;
+        if (px > ox + w || px + pw < ox || py > oy + h || py + phh < oy) continue;
+
+        var map2 = g.map;
+        var soil = fd.tone < 0.4 ? 'rgba(126,102,64,0.58)'
+                 : (fd.tone < 0.75 ? 'rgba(152,138,78,0.48)' : 'rgba(104,116,58,0.44)');
+
+        for (var ty2 = fd.y0; ty2 < fd.y1; ty2++) {
+          for (var tx2 = fd.x0; tx2 < fd.x1; tx2++) {
+            if (tx2 < 0 || ty2 < 0 || tx2 >= map2.w || ty2 >= map2.h) continue;
+            var tt = map2.tiles[ty2 * map2.w + tx2];
+            if (tt !== IF.T.FIELD) continue;      // a lane or copse stays itself
+            var cxp = tx2 * T, cyp = ty2 * T;
+
+            ctx.save();
+            ctx.beginPath(); ctx.rect(cxp, cyp, T, T); ctx.clip();
+            ctx.fillStyle = soil;
+            ctx.fillRect(cxp, cyp, T, T);
+
+            ctx.strokeStyle = 'rgba(58,46,28,0.32)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            var st = 9, o2;
+            if (fd.vert) {
+              for (o2 = -T; o2 < T * 2; o2 += st) {
+                var lx2 = fd.x0 * T + Math.round((cxp - fd.x0 * T + o2) / st) * st;
+                ctx.moveTo(lx2, cyp); ctx.lineTo(lx2, cyp + T);
+              }
+            } else {
+              for (o2 = -T; o2 < T * 2; o2 += st) {
+                var ly2 = fd.y0 * T + Math.round((cyp - fd.y0 * T + o2) / st) * st;
+                ctx.moveTo(cxp, ly2); ctx.lineTo(cxp + T, ly2);
+              }
+            }
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(214,198,150,0.22)';
+            ctx.lineWidth = 1.2;
+            ctx.translate(fd.vert ? 2 : 0, fd.vert ? 0 : 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
     },
 
     /* Each prop is a small drawing with its own shadow. Kept deliberately
@@ -588,6 +867,28 @@
       var sh = 'rgba(26,24,16,0.34)';
 
       switch (p.type) {
+        case 'hedge':
+          var hl = 20, hh = 9;
+          ctx.fillStyle = 'rgba(20,26,14,0.42)';
+          if (p.horiz) ctx.beginPath(), ctx.ellipse(4, 5, hl * 0.62, 5, 0, 0, 6.283), ctx.fill();
+          else ctx.beginPath(), ctx.ellipse(4, 5, 6, hl * 0.6, 0, 0, 6.283), ctx.fill();
+          ctx.fillStyle = '#33471f';
+          for (var hb = 0; hb < 4; hb++) {
+            var bxo = p.horiz ? -hl * 0.45 + hb * (hl * 0.3) : 0;
+            var byo = p.horiz ? ((hb % 2) ? 1.5 : -1.5) : -hl * 0.45 + hb * (hl * 0.3);
+            ctx.beginPath(); ctx.arc(bxo, byo - hh * 0.5, 7.2, 0, 6.283); ctx.fill();
+          }
+          ctx.fillStyle = '#456029';
+          for (var hb2 = 0; hb2 < 3; hb2++) {
+            var bx2 = p.horiz ? -hl * 0.35 + hb2 * (hl * 0.34) : -1.5;
+            var by2 = p.horiz ? -1.5 : -hl * 0.35 + hb2 * (hl * 0.34);
+            ctx.beginPath(); ctx.arc(bx2, by2 - hh * 0.72, 5.4, 0, 6.283); ctx.fill();
+          }
+          ctx.fillStyle = '#5a7a36';
+          ctx.beginPath();
+          ctx.arc(p.horiz ? -4 : -3, (p.horiz ? -3 : -6) - hh * 0.5, 3.2, 0, 6.283);
+          ctx.fill();
+          break;
         case 'bush':
           var br = 6 + p.v;
           ctx.fillStyle = sh;
@@ -862,10 +1163,10 @@
       ctx.save();
       ctx.translate(b.x, b.y);
 
-      var wallBase = legion ? '#5a5245' : '#5c6469';
-      var wallDark = legion ? '#3b352c' : '#3c4348';
-      var roofBase = legion ? '#6d6353' : '#6e777d';
-      var roofHi = legion ? '#857a67' : '#87919a';
+      var wallBase = legion ? '#5a5245' : '#59634a';
+      var wallDark = legion ? '#3b352c' : '#39422e';
+      var roofBase = legion ? '#6d6353' : '#6b7554';
+      var roofHi = legion ? '#857a67' : '#83906a';
 
       /* the side wall you can see, from the roof edge down to the ground */
       ctx.fillStyle = wallBase;
@@ -921,6 +1222,7 @@
       ctx.fillRect(gx, gy + h - H, w, 3);
 
       this.roofDetail(ctx, b, f, w, h, H, g);
+      this.structureDetail(ctx, b, f, w, h, H, g);
 
       if (b.complete) this.battleDamage(ctx, b, w, h, H);
       if (!b.complete) this.scaffold(ctx, b, w, h, H);
@@ -931,6 +1233,82 @@
 
       if (!remembered && b.complete) this.fires(ctx, b, g, H);
       if (!remembered) this.healthBar(ctx, b, b.x, b.y - h / 2 - H - 9, w * 0.8, g);
+    },
+
+    /* Fittings every structure carries: roof vents, an access ladder up the
+       wall, a floodlight, cable runs and a stencilled unit number. Small
+       things, but they are what make a box read as a building. */
+    structureDetail: function (ctx, b, f, w, h, H, g) {
+      var gx = -w / 2, gy = -h / 2, seed = b.id * 41;
+      ctx.save();
+
+      // roof vents and a water tank
+      ctx.translate(0, -H);
+      var vents = w > 100 ? 3 : 2;
+      for (var v = 0; v < vents; v++) {
+        var vx = gx + 9 + ((seed * (v + 3)) % Math.max(1, w - 26));
+        var vy = gy + 7 + ((seed * (v + 5)) % Math.max(1, h - 20));
+        ctx.fillStyle = 'rgba(0,0,0,0.30)';
+        ctx.fillRect(vx + 2, vy + 2, 9, 7);
+        ctx.fillStyle = '#5a6058';
+        ctx.fillRect(vx, vy, 9, 7);
+        ctx.fillStyle = '#767d72';
+        ctx.fillRect(vx, vy, 9, 2.4);
+        ctx.fillStyle = '#2b2f2a';
+        ctx.fillRect(vx + 1.5, vy + 3.5, 6, 1.6);
+      }
+      if (w > 90) {
+        ctx.fillStyle = 'rgba(0,0,0,0.28)';
+        ctx.beginPath(); ctx.ellipse(gx + w - 18, gy + 16, 9, 6, 0, 0, 6.283); ctx.fill();
+        ctx.fillStyle = '#4e5550';
+        ctx.beginPath(); ctx.ellipse(gx + w - 20, gy + 13, 9, 6, 0, 0, 6.283); ctx.fill();
+        ctx.fillStyle = '#6b736c';
+        ctx.beginPath(); ctx.ellipse(gx + w - 20, gy + 11, 9, 4, 0, 0, 6.283); ctx.fill();
+      }
+      ctx.restore();
+
+      ctx.save();
+      // access ladder running up the wall face
+      var lx = gx + w - 15;
+      ctx.strokeStyle = '#2f342b'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(lx, gy + h); ctx.lineTo(lx, gy + h - H);
+      ctx.moveTo(lx + 6, gy + h); ctx.lineTo(lx + 6, gy + h - H);
+      ctx.stroke();
+      ctx.lineWidth = 1.1;
+      for (var rung = 3; rung < H; rung += 5) {
+        ctx.beginPath(); ctx.moveTo(lx, gy + h - rung); ctx.lineTo(lx + 6, gy + h - rung); ctx.stroke();
+      }
+
+      // floodlight on a bracket, throwing a pool of light down the wall
+      var fx3 = gx + 11;
+      ctx.fillStyle = '#33382f';
+      ctx.fillRect(fx3, gy + h - H - 4, 8, 5);
+      ctx.fillStyle = '#ffdf9e';
+      ctx.fillRect(fx3 + 1, gy + h - H - 3, 6, 3);
+      var lg = ctx.createLinearGradient(fx3 + 4, gy + h - H, fx3 + 4, gy + h);
+      lg.addColorStop(0, 'rgba(255,214,140,0.22)');
+      lg.addColorStop(1, 'rgba(255,214,140,0)');
+      ctx.fillStyle = lg;
+      ctx.beginPath();
+      ctx.moveTo(fx3 + 1, gy + h - H);
+      ctx.lineTo(fx3 + 13, gy + h);
+      ctx.lineTo(fx3 - 8, gy + h);
+      ctx.closePath(); ctx.fill();
+
+      // stencilled unit number on the wall
+      ctx.fillStyle = 'rgba(228,220,196,0.42)';
+      ctx.font = 'bold 9px ui-monospace, Menlo, monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText((b.def.short || 'HQ') + '-' + (100 + (b.id % 90)), gx + 6, gy + h - 5);
+
+      // cable running out to the yard
+      ctx.strokeStyle = 'rgba(20,20,14,0.55)'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(gx + w - 8, gy + h - H + 3);
+      ctx.quadraticCurveTo(gx + w + 14, gy + h - 6, gx + w + 22, gy + h + 8);
+      ctx.stroke();
+      ctx.restore();
     },
 
     /* ------------------------------------------------------------------
@@ -1383,8 +1761,8 @@
     },
 
     soldier: function (ctx, u, f, x, y, seat, moving, firing, g) {
-      var coat = f.id === 'legion' ? '#6a5642' : '#556b5c';
-      var coatLo = f.id === 'legion' ? '#4a3c2d' : '#3b4c41';
+      var coat = f.id === 'legion' ? '#6a5642' : '#5c6740';
+      var coatLo = f.id === 'legion' ? '#4a3c2d' : '#3f492a';
       var ink = 'rgba(12,12,9,0.62)';
       var phase = (u.walk || 0) + seat * 1.9;
       var ph = moving ? Math.sin(phase) : 0;
@@ -1473,9 +1851,9 @@
       var legion = f.id === 'legion';
       var lift = 6;
       var t = u.type;
-      var hull = legion ? '#6b6049' : '#5c6a5f';
-      var hullHi = legion ? '#847860' : '#75857a';
-      var hullLo = legion ? '#463d2d' : '#3b453e';
+      var hull = legion ? '#6b6049' : '#5e6a44';
+      var hullHi = legion ? '#847860' : '#7b8a58';
+      var hullLo = legion ? '#463d2d' : '#3b4429';
       var ink = 'rgba(14,14,10,0.66)';
 
       // proportions per type
@@ -1553,10 +1931,15 @@
           ctx.beginPath(); ctx.arc(bx, -W / 2 - 1, 1.7, 0, 6.283); ctx.fill();
           ctx.beginPath(); ctx.arc(bx, W / 2 + 1, 1.7, 0, 6.283); ctx.fill();
         }
-        ctx.fillStyle = 'rgba(255,255,255,0.09)';
-        for (var lk = 0; lk < L; lk += 5) {
-          ctx.fillRect(-L / 2 + lk, -W / 2 - 3, 2.2, 4);
-          ctx.fillRect(-L / 2 + lk, W / 2 - 1, 2.2, 4);
+        // the link pattern scrolls with distance travelled, so the tracks
+        // visibly turn over as the tank drives
+        var roll = ((u.walk || 0) * 5) % 5;
+        ctx.fillStyle = 'rgba(255,255,255,0.11)';
+        for (var lk = -5; lk < L; lk += 5) {
+          var lx = -L / 2 + lk + roll;
+          if (lx < -L / 2 || lx > L / 2 - 2) continue;
+          ctx.fillRect(lx, -W / 2 - 3, 2.2, 4);
+          ctx.fillRect(lx, W / 2 - 1, 2.2, 4);
         }
       }
 
@@ -1644,7 +2027,7 @@
         ctx.fillStyle = 'rgba(0,0,0,0.26)';
         ctx.beginPath(); ctx.arc(1.5, 2.5, tr, 0, 6.283); ctx.fill();
 
-        ctx.fillStyle = legion ? '#77694f' : '#68786c';
+        ctx.fillStyle = legion ? '#77694f' : '#6d7a4e';
         if (t === 'heavy') {                       // slab-sided casemate turret
           ctx.beginPath();
           ctx.moveTo(-tr, -tr * 0.86); ctx.lineTo(tr * 0.75, -tr * 0.72);
@@ -1711,7 +2094,7 @@
       ctx.translate(a.x, a.y - alt * 0.15);
       ctx.rotate(a.facing);
       ctx.scale(1, Math.max(0.38, Math.cos(a.bank || 0)));
-      this.planeShape(ctx, a, f.id === 'legion' ? '#6a6049' : '#55697a', f.color, f, false);
+      this.planeShape(ctx, a, f.id === 'legion' ? '#6a6049' : '#5b6742', f.color, f, false);
       ctx.restore();
 
       // propellers
@@ -1999,16 +2382,50 @@
             ctx.lineWidth = Math.max(1, 5 * (1 - k));
             ctx.beginPath(); ctx.arc(e.x, e.y, e.r * (0.5 + k * 2.8), 0, 6.283); ctx.stroke();
             break;
+          case 'dring':
+            ctx.globalAlpha = (1 - k) * 0.34;
+            ctx.strokeStyle = '#c9b78e';
+            ctx.lineWidth = Math.max(1.5, 9 * (1 - k));
+            ctx.beginPath();
+            ctx.ellipse(e.x, e.y, e.r * (0.3 + k * 2.2), e.r * (0.3 + k * 2.2) * 0.42, 0, 0, 6.283);
+            ctx.stroke();
+            break;
           case 'boom':
+            if (e.delay && e.age < e.delay) break;
             ctx.globalAlpha = 1 - k;
+            var ry = e.y - (e.rise || 0) * k;
             var r = e.r * (0.4 + k * 1.6);
-            var grd = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, r);
+            var grd = ctx.createRadialGradient(e.x, ry, 0, e.x, ry, r);
             grd.addColorStop(0, 'rgba(255,248,214,0.98)');
             grd.addColorStop(0.32, 'rgba(255,178,60,0.85)');
             grd.addColorStop(0.7, 'rgba(196,72,26,0.55)');
             grd.addColorStop(1, 'rgba(80,34,16,0)');
             ctx.fillStyle = grd;
-            ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, 6.283); ctx.fill();
+            ctx.beginPath(); ctx.arc(e.x, ry, r, 0, 6.283); ctx.fill();
+            break;
+          case 'mark':
+            var mk = 1 - k;
+            ctx.globalAlpha = mk;
+            ctx.translate(e.x, e.y);
+            if (e.kind === 'attack') {
+              ctx.strokeStyle = '#e8613a'; ctx.lineWidth = 2.4;
+              var ms = 16 - k * 5;
+              ctx.beginPath();
+              ctx.moveTo(-ms, -ms + 6); ctx.lineTo(-ms, -ms); ctx.lineTo(-ms + 6, -ms);
+              ctx.moveTo(ms - 6, -ms); ctx.lineTo(ms, -ms); ctx.lineTo(ms, -ms + 6);
+              ctx.moveTo(ms, ms - 6); ctx.lineTo(ms, ms); ctx.lineTo(ms - 6, ms);
+              ctx.moveTo(-ms + 6, ms); ctx.lineTo(-ms, ms); ctx.lineTo(-ms, ms - 6);
+              ctx.stroke();
+            } else {
+              ctx.strokeStyle = '#b6e055'; ctx.lineWidth = 2.2;
+              var sc = 1 + k * 0.7;
+              ctx.beginPath();
+              ctx.ellipse(0, 2, 13 * sc, 7 * sc, 0, 0, 6.283);
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(-6, -8 + k * 5); ctx.lineTo(0, -2 + k * 5); ctx.lineTo(6, -8 + k * 5);
+              ctx.stroke();
+            }
             break;
           case 'trail':
             ctx.globalAlpha = (1 - k) * 0.26;
@@ -2229,6 +2646,36 @@
         this._vig = gr;
       }
       ctx.save();
+
+      /* Colour grade: a warm sunlit top falling to cool shadow at the
+         bottom, laid over the whole image. This is what pulls the terrain,
+         the units and the effects into looking like one photograph rather
+         than a set of separate drawings. */
+      if (!this._grade) {
+        var gg = ctx.createLinearGradient(0, 0, 0, h);
+        gg.addColorStop(0,    'rgba(255,214,150,0.20)');
+        gg.addColorStop(0.45, 'rgba(255,236,196,0.06)');
+        gg.addColorStop(1,    'rgba(46,58,86,0.22)');
+        this._grade = gg;
+      }
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.fillStyle = this._grade;
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalCompositeOperation = 'source-over';
+
+      /* Battlefield haze drifting across the view. */
+      if (this.quality === 'low') { ctx.fillStyle = this._vig; ctx.fillRect(0, 0, w, h); ctx.restore(); return; }
+      var t1 = g.time * 9, t2 = g.time * 5.5;
+      ctx.globalAlpha = 0.07;
+      ctx.fillStyle = '#d8c39a';
+      ctx.beginPath();
+      ctx.ellipse((t1 % (w + 900)) - 450, h * 0.42, 460, 110, 0, 0, 6.283);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(w - ((t2 % (w + 700)) - 350), h * 0.68, 380, 80, 0, 0, 6.283);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
       ctx.fillStyle = this._vig;
       ctx.fillRect(0, 0, w, h);
 

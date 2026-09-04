@@ -157,7 +157,8 @@
   /* --------------------------------------------------------------- effects */
   IF.fx = {
     push: function (game, e) {
-      if (game.effects.length > 900) game.effects.shift();
+      var cap = (IF.render && IF.render.quality === 'low') ? 320 : 900;
+      if (game.effects.length > cap) game.effects.shift();
       game.effects.push(e);
     },
     muzzle: function (game, x, y, ang) {
@@ -181,9 +182,20 @@
     trail: function (game, x, y) {
       this.push(game, { t: 'trail', x: x, y: y, r: IF.rand(2.5, 4.5), life: 1.6, age: 0 });
     },
+    /* Flat ring of dust punched outwards along the ground. */
+    dustRing: function (game, x, y, r) {
+      this.push(game, { t: 'dring', x: x, y: y, r: r, life: 0.9, age: 0 });
+    },
+
     explosion: function (game, x, y, r) {
-      this.push(game, { t: 'boom', x: x, y: y, r: r, life: 0.45, age: 0 });
-      if (r > 14) this.ring(game, x, y, r);
+      // the fireball climbs as it burns out
+      this.push(game, { t: 'boom', x: x, y: y, r: r, life: 0.5, age: 0, rise: r * 0.5 });
+      if (r > 14) { this.ring(game, x, y, r); this.dustRing(game, x, y, r * 1.4); }
+      if (r > 30) {
+        // a second, slower ball of flame on top of the first
+        this.push(game, { t: 'boom', x: x + IF.rand(-r * 0.2, r * 0.2), y: y - r * 0.3,
+                          r: r * 0.75, life: 0.8, age: 0, rise: r * 1.1, delay: 0.09 });
+      }
       var n = Math.min(18, 4 + (r / 4) | 0);
       for (var i = 0; i < n; i++) {
         var a = Math.random() * Math.PI * 2, sp = IF.rand(30, 40 + r * 3);
@@ -215,6 +227,10 @@
     },
     smoke: function (game, x, y, r) {
       this.push(game, { t: 'smoke', x: x, y: y, r: r, life: IF.rand(1.2, 2.4), age: 0, vy: -10 });
+    },
+    /* Order feedback dropped on the ground where you clicked. */
+    mark: function (game, x, y, kind) {
+      this.push(game, { t: 'mark', x: x, y: y, kind: kind, life: 0.75, age: 0 });
     },
     text: function (game, x, y, str, col) {
       this.push(game, { t: 'text', x: x, y: y, str: str, col: col || '#e8e4d2', life: 1.4, age: 0 });

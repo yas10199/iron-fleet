@@ -38,7 +38,7 @@
           return;
         }
         if (e.button === 2) { self.rightClick(g, w, e.shiftKey); return; }
-        if (e.button === 1) { self.panning = { x: e.clientX, y: e.clientY, cx: g.cam.x, cy: g.cam.y }; return; }
+        if (e.button === 1) { self.panning = { x: e.clientX, y: e.clientY, cx: g.cam.tx, cy: g.cam.ty }; return; }
 
         if (g.placing) { self.place(g, e.shiftKey); return; }
         // "A then click" is an attack-move order, not the start of a drag.
@@ -62,10 +62,19 @@
           g.placing.ty = IF.clamp(Math.round(w.y / T - def.h / 2), 0, g.map.h - def.h);
         }
         if (self.panning) {
-          g.cam.x = IF.clamp(self.panning.cx - (e.clientX - self.panning.x), 0, Math.max(0, g.map.pxW - g.viewW));
-          g.cam.y = IF.clamp(self.panning.cy - (e.clientY - self.panning.y), 0, Math.max(0, g.map.pxH - g.viewH));
+          var z2 = g.cam.zoom || 1;
+          g.cam.tx = IF.clamp(self.panning.cx - (e.clientX - self.panning.x) / z2, 0, Math.max(0, g.map.pxW - g.viewW));
+          g.cam.ty = IF.clamp(self.panning.cy - (e.clientY - self.panning.y) / z2, 0, Math.max(0, g.map.pxH - g.viewH));
+          g.cam.x = g.cam.tx; g.cam.y = g.cam.ty;
         }
         if (g.dragBox) { g.dragBox.x1 = w.x; g.dragBox.y1 = w.y; }
+
+        // Cheap throttle: picking scans every unit, and mousemove fires a lot.
+        var now = performance.now();
+        if (now - (self._hoverAt || 0) > 70) {
+          self._hoverAt = now;
+          self.hover = self.mouse.inside ? self.entityAt(g, w.x, w.y) : null;
+        }
       });
 
       window.addEventListener('mouseup', function (e) {
@@ -109,7 +118,17 @@
         }
         if (k === 's') { self.forEachSelectedUnit(g, function (u) { u.orderStop(); }); }
         if (k === 'h') { var hq = g.findBuilding(0, 'hq'); if (hq) g.centerOn(hq.x, hq.y); }
+        if (k === 'e') {
+          // every fighting unit on the map, harvesters left alone
+          var army = [];
+          for (var ai = 0; ai < g.units.length; ai++) {
+            var au = g.units[ai];
+            if (!au.dead && au.owner === 0 && !au.def.harvest) army.push(au);
+          }
+          if (army.length) { g.selection = army; g.msg('Selected your whole army — ' + army.length + ' units'); IF.audio.play('select'); }
+        }
         if (k === 'p') { g.paused = !g.paused; }
+        if (k === 'tab') { document.body.classList.toggle('uihidden'); e.preventDefault(); }
         if (k >= '1' && k <= '9') {
           if (e.ctrlKey || e.metaKey) {
             self.groups[k] = g.selection.slice();
@@ -127,6 +146,22 @@
       this.initTouch(canvas, mini);
     },
 
+    /* Called when a new match starts. Without this, control groups still
+       hold units from the last game and the attack cursor stays armed. */
+    reset: function () {
+      this.groups = {};
+      this.hover = null;
+      this.attackMove = false;
+      this.dragStart = null;
+      this.panning = null;
+      this.miniDrag = false;
+      this.touchMode = null;
+      var a = document.getElementById('btnTouchAttack');
+      if (a) a.classList.remove('on');
+      var sBtn = document.getElementById('btnTouchSelect');
+      if (sBtn) sBtn.classList.remove('on');
+    },
+
     toWorld: function (e) {
       var g = IF.game;
       var r = this.canvas.getBoundingClientRect();
@@ -136,14 +171,14 @@
 
     /* Wheel zoom, anchored on whatever is under the cursor. */
     zoomBy: function (g, factor, sx, sy) {
-      var z0 = g.cam.zoom || 1;
-      var z1 = IF.clamp(z0 * factor, 0.55, 1.9);
-      if (z1 === z0) return;
-      var wx = sx / z0 + g.cam.x, wy = sy / z0 + g.cam.y;
-      g.cam.zoom = z1;
-      g.viewW = IF.render.cw / z1; g.viewH = IF.render.ch / z1;
-      g.cam.x = IF.clamp(wx - sx / z1, 0, Math.max(0, g.map.pxW - g.viewW));
-      g.cam.y = IF.clamp(wy - sy / z1, 0, Math.max(0, g.map.pxH - g.viewH));
+      var z0 = g.cam.zoomT || g.cam.zoom || 1;
+      var z1 = IF.clamp(z0 * factor, 0.6, 1.8);
+      if (Math.abs(z1 - z0) < 0.0001) return;
+      var wx = sx / z0 + g.cam.tx, wy = sy / z0 + g.cam.ty;
+      g.cam.zoomT = z1;
+      var vw = IF.render.cw / z1, vh = IF.render.ch / z1;
+      g.cam.tx = IF.clamp(wx - sx / z1, 0, Math.max(0, g.map.pxW - vw));
+      g.cam.ty = IF.clamp(wy - sy / z1, 0, Math.max(0, g.map.pxH - vh));
     },
 
     /* --------------------------------------------------- placement */
@@ -220,15 +255,39 @@
         if (u.dead) continue;
         if (u.owner !== 0 && !g.fog.visibleAt(u.x, u.y)) continue;
         if (u.def.domain === 'air' && u.astate === 'rearm') continue;
-        var d = IF.dist2(x, y, u.x, u.y);
-        if (d < (u.rad + 8) * (u.rad + 8) && d < bd) { bd = d; best = u; }
+        var d = IF.dist2(x, y + 5, u.x, u.y);
+        if (d < (u.rad + 11) * (u.rad + 11) && d < bd) { bd = d; best = u; }
       }
       if (best) return best;
       for (i = 0; i < g.buildings.length; i++) {
         var b = g.buildings[i];
         if (b.dead) continue;
         if (b.owner !== 0 && !g.fog.exploredAt(b.x, b.y)) continue;
-        if (x > b.x - b.w / 2 && x < b.x + b.w / 2 && y > b.y - b.h / 2 && y < b.y + b.h / 2) return b;
+        // Buildings are drawn lifted by their height, so the clickable area
+        // has to cover the raised roof as well as the ground footprint.
+        var lift = (IF.render.heightOf ? IF.render.heightOf(b.type) : 0);
+        if (x > b.x - b.w / 2 && x < b.x + b.w / 2 &&
+            y > b.y - b.h / 2 - lift && y < b.y + b.h / 2) return b;
+      }
+      return null;
+    },
+
+    /* Closest enemy to a point that the player can actually see. */
+    enemyNear: function (g, x, y, r) {
+      var best = null, bd = r * r, i;
+      for (i = 0; i < g.units.length; i++) {
+        var u = g.units[i];
+        if (u.dead || u.owner === 0) continue;
+        if (!g.fog.visibleAt(u.x, u.y)) continue;
+        var d = IF.dist2(x, y + 5, u.x, u.y);
+        if (d < bd) { bd = d; best = u; }
+      }
+      if (best) return best;
+      for (i = 0; i < g.buildings.length; i++) {
+        var b = g.buildings[i];
+        if (b.dead || b.owner === 0) continue;
+        if (!g.fog.exploredAt(b.x, b.y)) continue;
+        if (IF.rectDist(x, y, b) < r) return b;
       }
       return null;
     },
@@ -270,6 +329,12 @@
       }
 
       var target = this.entityAt(g, x, y);
+      // Small units are hard to hit exactly, especially on a phone. If the
+      // order lands near an enemy, treat it as an order to attack that enemy.
+      if (!target || target.owner === 0) {
+        var snap = this.enemyNear(g, x, y, this.attackMove || forceAttackMove ? 60 : 30);
+        if (snap) target = snap;
+      }
       var node = this.nodeAt(g, x, y);
       var ordered = false;
 
@@ -296,7 +361,8 @@
       if (ordered) {
         IF.audio.play('order');
         IF.audio.ack(units[0].type, (target && target.owner !== 0) ? 'attack' : 'move');
-        IF.fx.push(g, { t: 'boom', x: x, y: y, r: 7, life: 0.3, age: 0 });
+        if (target && target.owner !== 0) IF.fx.mark(g, target.x, target.y, 'attack');
+        else IF.fx.mark(g, x, y, 'move');
       }
       this.attackMove = false;
     },
@@ -319,7 +385,7 @@
         if (e.touches.length !== 1) return;
         var t = e.touches[0], r = canvas.getBoundingClientRect();
         start = {
-          sx: t.clientX, sy: t.clientY, cx: g.cam.x, cy: g.cam.y,
+          sx: t.clientX, sy: t.clientY, cx: g.cam.tx, cy: g.cam.ty,
           wx: t.clientX - r.left + g.cam.x, wy: t.clientY - r.top + g.cam.y,
           time: performance.now()
         };
@@ -335,8 +401,10 @@
           var r = canvas.getBoundingClientRect();
           g.dragBox = { x0: start.wx, y0: start.wy, x1: t.clientX - r.left + g.cam.x, y1: t.clientY - r.top + g.cam.y };
         } else if (moved) {
-          g.cam.x = IF.clamp(start.cx - dx, 0, Math.max(0, g.map.pxW - g.viewW));
-          g.cam.y = IF.clamp(start.cy - dy, 0, Math.max(0, g.map.pxH - g.viewH));
+          var tz = g.cam.zoom || 1;
+          g.cam.tx = IF.clamp(start.cx - dx / tz, 0, Math.max(0, g.map.pxW - g.viewW));
+          g.cam.ty = IF.clamp(start.cy - dy / tz, 0, Math.max(0, g.map.pxH - g.viewH));
+          g.cam.x = g.cam.tx; g.cam.y = g.cam.ty;
         }
       }, { passive: true });
 
@@ -374,6 +442,14 @@
         self.touchMode = self.touchMode === 'select' ? null : 'select';
         this.classList.toggle('on', self.touchMode === 'select');
       });
+      var batk = document.getElementById('btnTouchAttack');
+      if (batk) batk.addEventListener('click', function () {
+        self.attackMove = !self.attackMove;
+        this.classList.toggle('on', self.attackMove);
+        if (IF.game) IF.game.msg(self.attackMove
+          ? 'Attack ordered — now tap the target'
+          : 'Attack order cancelled');
+      });
       var ba = document.getElementById('btnTouchStop');
       if (ba) ba.addEventListener('click', function () {
         var g = IF.game; if (!g) return;
@@ -381,8 +457,27 @@
       });
     },
 
-    /* ------------------------------------------------------- camera */
+    /* ------------------------------------------------------- camera
+       The camera chases a target rather than snapping to it, so panning,
+       edge-scrolling and map jumps all glide instead of juddering. */
     updateCamera: function (g, dt) {
+      var ease = 1 - Math.pow(0.0016, dt);          // frame-rate independent
+      var zt = g.cam.zoomT || g.cam.zoom;
+      if (Math.abs(zt - g.cam.zoom) > 0.0008) {
+        g.cam.zoom += (zt - g.cam.zoom) * ease;
+        g.viewW = IF.render.cw / g.cam.zoom;
+        g.viewH = IF.render.ch / g.cam.zoom;
+      } else g.cam.zoom = zt;
+      this.driveTarget(g, dt);
+      g.cam.tx = IF.clamp(g.cam.tx, 0, Math.max(0, g.map.pxW - g.viewW));
+      g.cam.ty = IF.clamp(g.cam.ty, 0, Math.max(0, g.map.pxH - g.viewH));
+      g.cam.x += (g.cam.tx - g.cam.x) * ease;
+      g.cam.y += (g.cam.ty - g.cam.y) * ease;
+      if (Math.abs(g.cam.tx - g.cam.x) < 0.4) g.cam.x = g.cam.tx;
+      if (Math.abs(g.cam.ty - g.cam.y) < 0.4) g.cam.y = g.cam.ty;
+    },
+
+    driveTarget: function (g, dt) {
       var sp = this.panSpeed * dt;
       var dx = 0, dy = 0;
       if (this.keys['arrowleft']) dx -= sp;
@@ -397,10 +492,7 @@
         if (this.mouse.y < edge) dy -= sp;
         if (this.mouse.y > g.viewH - edge) dy += sp;
       }
-      if (dx || dy) {
-        g.cam.x = IF.clamp(g.cam.x + dx, 0, Math.max(0, g.map.pxW - g.viewW));
-        g.cam.y = IF.clamp(g.cam.y + dy, 0, Math.max(0, g.map.pxH - g.viewH));
-      }
+      if (dx || dy) { g.cam.tx += dx; g.cam.ty += dy; }
     }
   };
 

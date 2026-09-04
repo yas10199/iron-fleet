@@ -40,6 +40,9 @@
     this.ai = new IF.AI(this, 1, opts.difficulty);
 
     this.fog = new IF.Fog(this);
+    // Clear anything the interface was still holding from the last match —
+    // control groups, the hovered unit, an armed attack cursor.
+    if (IF.input && IF.input.reset) IF.input.reset();
     this.setupBases();
     this.centerOn(this.players[0].hqStart.x, this.players[0].hqStart.y);
   }
@@ -321,6 +324,19 @@
       for (var cat in p.queues) {
         var q = p.queues[cat];
         if (!q.length) continue;
+        // Nothing left standing that could build these: give the money back
+        // rather than leaving the order queued for the rest of the match.
+        if (!this.hasProducer(pid, cat)) {
+          var back = 0;
+          while (q.length) {
+            var it = q.pop();
+            p.supplies += it.cost.s; p.fuel += it.cost.f;
+            p.popQueued -= IF.UNITS[it.id].pop;
+            back++;
+          }
+          if (pid === 0) this.msg(back + ' queued order' + (back > 1 ? 's' : '') + ' refunded — nothing left to build them');
+          continue;
+        }
         var producer = this.idleProducer(pid, cat);
         if (!producer) continue;
         var item = q.shift();
@@ -343,6 +359,14 @@
       if (!bl.dead && bl.owner === pid && bl.busy && bl.busy.unitId === unitId) n++;
     }
     return n;
+  };
+
+  Game.prototype.hasProducer = function (pid, cat) {
+    for (var i = 0; i < this.buildings.length; i++) {
+      var b = this.buildings[i];
+      if (!b.dead && b.complete && b.owner === pid && b.def.produces === cat) return true;
+    }
+    return false;
   };
 
   Game.prototype.idleProducer = function (pid, cat) {
@@ -383,6 +407,34 @@
     this.pay(pid, def.cost);
     var b = this.addBuilding(type, pid, tx, ty, false);
     if (pid === 0) { IF.audio.play('build', b.x, b.y); }
+    return true;
+  };
+
+  /* Dismantle a structure for half of what it cost. Useful for clearing a
+     badly placed building, or cashing in defences you have advanced past. */
+  Game.prototype.sell = function (pid, b) {
+    if (!b || b.dead || b.owner !== pid) return false;
+    if (b.type === 'hq') { if (pid === 0) this.deny('You cannot dismantle your Headquarters'); return false; }
+    var p = this.players[pid];
+    var rate = b.complete ? 0.5 : 0.5 * b.progress;
+    var backS = Math.round((b.def.cost.s || 0) * rate);
+    var backF = Math.round((b.def.cost.f || 0) * rate);
+    p.supplies += backS; p.fuel += backF;
+    if (b.busy) {
+      var r2 = this.unitCost(pid, b.busy.unitId);
+      p.supplies += r2.s; p.fuel += r2.f;
+      b.busy = null;
+    }
+    b.dead = true;
+    this.map.release(b);
+    if (IF.render && IF.render.invalidateGround) IF.render.invalidateGround();
+    for (var i = 0; i < 5; i++) IF.fx.dust(this, b.x + IF.rand(-b.w / 2, b.w / 2), b.y + IF.rand(-b.h / 2, b.h / 2));
+    IF.fx.text(this, b.x, b.y - 10, '+' + backS, '#e2c46a');
+    var si = this.selection.indexOf(b);
+    if (si >= 0) this.selection.splice(si, 1);
+    IF.audio.play('build', b.x, b.y);
+    if (pid === 0) this.msg(b.def.name + ' dismantled — ' + backS + ' supplies recovered');
+    this.recalc();
     return true;
   };
 
@@ -557,6 +609,15 @@
     for (var pid = 0; pid < 2; pid++) {
       var p = this.players[pid];
       if (p.research) {
+        // A programme needs somewhere to run. Lose the lab and it halts
+        // where it is, resuming if you rebuild.
+        if (!this.hasBuilding(pid, 'lab')) {
+          if (pid === 0 && this.time - (this._labWarn || -99) > 30) {
+            this._labWarn = this.time;
+            this.warn('Research halted — no Laboratory');
+          }
+          continue;
+        }
         p.research.left -= dt * (p.powerBalance < 0 ? 0.5 : 1);
         if (p.research.left <= 0) {
           p.tech[p.research.id] = true;
